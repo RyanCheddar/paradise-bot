@@ -3,6 +3,7 @@ import asyncio
 # ===================================================
 # || Update Balance - Updates Para Rewards balance ||
 # ||                                               ||
+# || Parameters:                                   ||
 # || userid - The user's id                        ||
 # ||                                               ||
 # || action - The action being done, valid options ||
