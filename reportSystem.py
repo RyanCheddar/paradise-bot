@@ -28,3 +28,6 @@ async def on_message(message):
         await message.channel.send(":PogChamp:")
 
 client.run('NzYxOTcwNDc3NTMwNzQyNzg0.X3iWTg.OzC7N5qC5jeH25mpz4XErcT5-CQ')
+
+
+# TODO: make prettier cause nice
