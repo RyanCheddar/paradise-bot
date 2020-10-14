@@ -26,8 +26,6 @@ async def on_message(message):
     if message.content == 'cheddar':
         await message.channel.send(":PogChamp~5:")
 
-client.run('NzYxOTcwNDc3NTMwNzQyNzg0.X3iWTg.cxSNZ3uOFC9bnotSz5aLkPa4RII')
-
 
 # CHANGED: prettier
 # TODO: MORE PRETTIER
