@@ -23,5 +23,8 @@ async def on_message(message):
         reportFinal=discord.Embed(color=0xff0000)
         reportFinal.add_field(name="Report by " + str(reporter), value=str(reportcontent), inline=False)
         await reportchannel.send(embed=reportFinal)
+    
+    if message.content == 'cheddar':
+        await message.channel.send(":PogChamp:")
 
 client.run('NzYxOTcwNDc3NTMwNzQyNzg0.X3iWTg.OzC7N5qC5jeH25mpz4XErcT5-CQ')
