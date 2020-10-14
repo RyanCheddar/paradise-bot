@@ -19,14 +19,14 @@ async def on_message(message):
             reporter = message.author
             successMsg = discord.Embed(color=0x00ff1a)
             successMsg.add_field(name="Successfull", value="Report submitted!", inline=False)
-            successMsg.set_footer(text=str(reporter))
+            successMsg.set_footer(icon_url=message.author.avatar_url, text='\nRequested by:\n{0}'.format(message.author))
             await message.channel.send(embed=successMsg)
             reportFinal = discord.Embed(title="Report by " + str(reporter), description=str(reportcontent), timestamp=datetime.datetime.now(datetime.timezone.utc), inline=False, color=0xff0000)
             await reportchannel.send(embed=reportFinal)
         except IndexError:
-            errorMsg = discord.Embed(name="Incorrect syntax", value="Usage: p!report [report]", inline=False, color=0xff0000)
+            errorMsg = discord.Embed(title="Incorrect syntax", description="Usage: p!report [report]", inline=False, color=0xff0000)
+            errorMsg.set_footer(icon_url=message.author.avatar_url, text='\nRequested by:\n{0}'.format(message.author))
             await message.channel.send(embed=errorMsg)
 
-
-# CHANGED: prettier
-# TODO: MORE PRETTIER
+# CHANGED: MORE PRETTIER
+# TODO: EVEN MORE PRETTIER
