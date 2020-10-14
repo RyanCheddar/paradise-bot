@@ -2,7 +2,7 @@ import discord
 from discord.ext.commands import Bot
 from discord.utils import get
 import asyncio
-
+import datetime
 
 client = Bot('!')
 
@@ -16,18 +16,18 @@ async def on_message(message):
         reportcontent = message.content.split(None, 1)[1]
         reportchannel = client.get_channel(765525235042222080)
         reporter = message.author
-        successMsg=discord.Embed(color=0x00ff1a)
+        successMsg = discord.Embed(color=0x00ff1a)
         successMsg.add_field(name="Successfull", value="Report sumitted!", inline=False)
         successMsg.set_footer(text=str(reporter))
         await message.channel.send(embed=successMsg)
-        reportFinal=discord.Embed(color=0xff0000)
-        reportFinal.add_field(name="Report by " + str(reporter), value=str(reportcontent), inline=False)
+        reportFinal = discord.Embed(title="Report by " + str(reporter), description=str(reportcontent), timestamp=datetime.datetime.now(datetime.timezone.utc), inline=False, color=0xff0000)
         await reportchannel.send(embed=reportFinal)
-    
+
     if message.content == 'cheddar':
-        await message.channel.send(":PogChamp:")
+        await message.channel.send(":PogChamp~5:")
 
-client.run('NzYxOTcwNDc3NTMwNzQyNzg0.X3iWTg.OzC7N5qC5jeH25mpz4XErcT5-CQ')
+client.run('NzYxOTcwNDc3NTMwNzQyNzg0.X3iWTg.cxSNZ3uOFC9bnotSz5aLkPa4RII')
 
 
-# TODO: make prettier cause nice
+# CHANGED: prettier
+# TODO: MORE PRETTIER
