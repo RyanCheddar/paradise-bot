@@ -10,12 +10,13 @@ from threading import Thread
 import time
 import json
 from discord.utils import get
+
 ipgrab = ["GRABIFYLINK", "LEANCODINGCO", "SIOPIFY", "FREEGIFICARDSCO", "CURIOUSCAICLUB", "CAISNIHINGSFUN", "JOINMYSIIE",
           "CAISNIHINGSCOM", "IPLOGGERORG", "BLASZECOM", "WEBRESOLVERNL", "CURLV", "SHORIESI", "BIIURLIO", "RURLCO",
-          "IPLOGGERCOM", "IPLOGGERRU", "2NOCO", "YIPSU","SKELDRBOI"]
-blocked_word = ['NIGGA', 'NIGGER', "NIGG", "REGIN", "IMAGPX", "REGGIN", "FAGGOT", "RETARD", "CUNT","OOOL"]
+          "IPLOGGERCOM", "IPLOGGERRU", "2NOCO", "YIPSU"]
+blocked_word = ['NIGGA', 'NIGGER', "NIGG", "REGIN", "IMAGPX", "REGGIN", "FAGGOT", "RETARD"]
 secretcode = ['p!autodelete']
-#url_short=["BITLY","REBRANDLY","TINYURL","YOURLSORG","GOOGL","ISGD","BITDO"]
+
 path_event_cooldown="event-ping-cooldown.txt"
 path_specialist_cooldown="specialist-ping-cooldown.txt"
 path_youtube_cooldown="youtube-ping-cooldown.txt"
