@@ -1,15 +1,11 @@
 import asyncio
 import discord
-from discord.ext import commands
-#from discord.utils import get
 import pickle
-#import pandas as pd
 import datetime
 import re
 from threading import Thread
 import time
 import json
-from discord.utils import get
 
 ipgrab = ["GRABIFYLINK", "LEANCODINGCO", "SIOPIFY", "FREEGIFICARDSCO", "CURIOUSCAICLUB", "CAISNIHINGSFUN", "JOINMYSIIE",
           "CAISNIHINGSCOM", "IPLOGGERORG", "BLASZECOM", "WEBRESOLVERNL", "CURLV", "SHORIESI", "BIIURLIO", "RURLCO",
@@ -20,12 +16,6 @@ secretcode = ['p!autodelete']
 path_event_cooldown="event-ping-cooldown.txt"
 path_specialist_cooldown="specialist-ping-cooldown.txt"
 path_youtube_cooldown="youtube-ping-cooldown.txt"
-#event_ping_cooldown:list=['640773439115886642,9']
-#specialist_ping_cooldown:list=['640773439115886642,9']
-#youtube_ping_cooldown:list=['640773439115886642,9']
-#cooldowns={'event:':event_ping_cooldown,'specialist':specialist_ping_cooldown,'youtube:':youtube_ping_cooldown}
-#with open('cooldowns.json', 'w') as f:
-#  json.dump(cooldowns, f)
 
 with open('cooldowns.json', 'rb') as f:
     cooldowns = json.load(f)
@@ -64,6 +54,7 @@ def pass_cooldown(item:list,cool,path_info):
         print("opened file path")
         pickle.dump(cool, f)
     print("cooldown over: ", cool)
+
 async def check_url(content):
     urls = re.findall('(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-?=%.]+',content.replace(",", ".").replace(" .", ".").lower())
     print(urls)
@@ -72,6 +63,7 @@ async def check_url(content):
             return True
         else:
             return False
+
 async def check_blocked_word(content):
     if any(ele in content.upper().replace("\n", "").replace("t", "i").replace("-", "").replace(" ", "").replace(".", "").replace('"', "").replace(",", "").replace("REGIONAL_INDICATOR_", "").replace(":", "").replace("_","").replace("*", "") for ele in blocked_word) == True:
         return True
@@ -90,59 +82,17 @@ for i in youtube_ping_cooldown:
     print(i)
 #Thread(target =pass_event_cooldown).start()
 #Thread(target =pass_specialist_cooldown).start()
-print ("started cooldowns")
 
 #staff_roles=['Owner','Ripanovia','Admin','Developer','Sr. Mod','Partnership Coordinator','Staff Council ⚒️','Mod','Helper']
 #bot = commands.Bot(command_prefix='?')
-bot=discord.Client()
-async def split(content,number):
-    content_list:list=[]
-    content_str:str=""
-    returned:bool=False
-    number=int(number)
-    number-=1
-    content=str(content)
-    content=content+" "
-    print ("content recieved: ",content)
-    for b in enumerate(range(len(content))):
-        i=b[1]
-        print (i)
-        if content[i]==" ":
-            content_list.append(content_str)
-            print ("apppeded to list")
-            content_str=""
-        else:
-            content_str=content_str+content[i]
-        if len(content_list)-1==number:
-            print ("limit found")
-            print (content_list)
-            try:
-                optional_arg=content[i + 1:]
-                content_list.append(optional_arg)
-                if str(content_list[-1])=="":
-                    content_list.remove(optional_arg)
-            except IndexError:
-                print ("No optional arguement found")
-            return content_list
-            returned=True
-    print (content_list)
-    if returned==False:
-        return "none"
+
+client = discord.Client()
 
 
-async def get_digit(input):
-    to_be_return:str=""
-    for i in input:
-        i=str(i)
-        if i in "1234567890":
-            to_be_return=to_be_return+i
-    return to_be_return
-
-
-async def staff_ping_check(ctx):
-    channel = ctx.channel
-    channel = ctx.channel
-    member = ctx.author
+async def staff_ping(message):
+    channel = message.channel
+    channel = message.channel
+    member = message.author
     print ("checking for staff pings in msg")
     if "<@&714456813612826675>" in ctx.content:
         print ("Omg let me ping all staff members")
@@ -184,7 +134,7 @@ async def staff_ping_check(ctx):
         except discord.errors.NotFound:
             print ("discord.errors.Notfound")
 
-@bot.event
+@client.event
 async def on_raw_reaction_add(payload):
     emoji = str(payload.emoji)
     if payload.event_type == 'REACTION_ADD':
@@ -686,7 +636,7 @@ async def react(ctx):
                            await msg_ctx.add_reaction(reaction.emoji)
 
 
-@bot.event
+@client.event
 async def on_member_update(before,after):
     #print (after)
     nickname=str(after.nick)
@@ -696,74 +646,32 @@ async def on_member_update(before,after):
         await log('Bad language was detected in ' + after.name + '\'s nickname, it has been deleted and PM has been sent.')
         await after.edit(nick=before.nick)
 
-
-@bot.event
-async def on_command_error(ctx, error):
-    if isinstance(error, commands.errors.MissingRequiredArgument):
-        await ctx.send('The syntax is wrong, you are missing an arguement')
-
-@bot.event
-async def on_message(ctx):
-    member = ctx.author
-    content = ctx.content
-    if ctx.author.bot == True:
+@client.event
+async def on_message(message):
+    if message.author.bot:
         return
-    print ("author: ",ctx.author)
-    print ("content: ",ctx.content)
-    split_content=content.split(None, 1)
-    if await check_url(content)==True:
-        await ctx.delete()
-        await ctx.channel.send(
-            member.mention + "\n\n**[8] Respect Privacy** - <#683331763090620427>\n\nIP Grabbers, malicious or not are not allowed in Paradise Network. **Attempts to bypass this filter will result in a permanent ban.**")
+
+    if msg_analysis(message):
         return
-    if await check_blocked_word(content)==True:
-        try:
-            await ctx.delete()
-        except: discord.NotFound
-        await member.send('Please refrain from using derogartory language in your messages. Attempts to circumvent this filter will result in severe punishment!')
-        await log('Bad language was detected in ' + member.name + '\'s edited message, message has been deleted and PM has been sent.')
-    if any(ele in content for ele in secretcode) == True:
-        await ctx.delete(delay=10)
-    await staff_ping_check(ctx)
-    if content.startswith('p!')==True:
-        commands={
-            'p!clear':temp,
-            'p!youtube-ping':youtube,
-            'p!ping-specialist':specialist,
-            'p!event-ping':event,
-            'p!confirm':confirm,
-            'p!say':say,
-            'p!edit':edit,
-            'p!react':react
+
+    commands={
+        'p!clear':temp,
+        'p!youtube-ping':youtube,
+        'p!ping-specialist':specialist,
+        'p!event-ping':event,
+        'p!confirm':confirm,
+        'p!say':say,
+        'p!edit':edit,
+        'p!react':react
         }
-        content_str=str(split_content[0])
-
-        print ("the command i found:",commands.get(content_str))
-        if commands.get(content_str)!=None:
-            await commands[content_str](ctx)
-        else:
-            await ctx.channel.send(f"Unknown Command `{content_str}`")
-    #if ctx.content.startswith('p!clear'):
-    #    await temp(ctx)
-    #    return
-    #if ctx.content.startswith('p!youtube-ping'):
-    #    await youtube(ctx)
-    #    return
-    #if ctx.content.startswith('p!ping-specialist'):
-    #    await specialist(ctx)
-    #    return
-    #if ctx.content.startswith('p!event-ping'):
-    #    await event(ctx)
-    #    return
+    
+    if message.content.startswith('p!')==True:
+        if message.content.split()[0] in commands:
+            await commands[message.content.split()[0]](message)
+            return
 
 
-
-
-    #await bot.process_commands(ctx)
-
-
-
-@bot.event
+@client.event
 async def on_message_edit(before, after):
     if after.author.bot == True:
         return
@@ -794,29 +702,20 @@ async def BadName(member, message):
         except discord.HTTPException:
             return
         return
+
 async def log(text):
-    print("getting log channel")
-    devlog = bot.get_channel(int("683331960705515570"))
-    print("sending logs")
+    devlog = client.get_channel(int("683331960705515570"))
     await devlog.send(text)
-    print("log sent")
 
 async def confirm(ctx):
     channel=ctx.channel
 
-@bot.event
+@client.event
 async def on_ready():
-    print ("ready")
-    #guild=bot.get_guild(int("674474377286516736"))
-    #print (guild)
-    #channel=bot.get_channel(int("683331849195487232"))
-    #await channel.send("<@649604306596528138> \n Roses are red, \n Voilets are blue \n If you say this shit again, \n I will ban you")
-    #add_role = get(guild.roles, name="Hot Pink")
-    #print (add_role)
-    #user_id=bot.user.id
-    #user=guild.get_member(user_id)
-    #print (user,type(user))
-    #await user.add_roles(add_role)
+    print("====================")
+    print("Paradise Bot Started")
+    print("====================")
+    activity = discord.Activity(name='Paradise Network', type=discord.ActivityType.watching)
+    await client.change_presence(status=discord.Status.online, activity=activity)
+
 bot.run('NzYxOTcwNDc3NTMwNzQyNzg0.X3iWTg.ot6JKf2tUDKK7nNDHiTfSLoGskE')
-#bot.run('Njc5NjQ3NzY2MjgwMDExODMz.Xk0ZTg.BAB6C81qczhqDJI28ytTME4qx0w')
-#client.run('NzYxOTcwNDc3NTMwNzQyNzg0.X3iWTg.OzC7N5qC5jeH25mpz4XErcT5-CQ')
