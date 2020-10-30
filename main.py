@@ -26,13 +26,13 @@ secretcode = ['p!autodelete']
 async def on_raw_reaction_add(payload):
     emoji = str(payload.emoji)
     if payload.event_type == 'REACTION_ADD':
-        member = bot.get_user(payload.user_id)
+        member = client.get_user(payload.user_id)
         if member == None:
             return
         if member.bot == True:
             return
         try:
-            message = await bot.get_channel(payload.channel_id).fetch_message(payload.message_id)
+            message = await client.get_channel(payload.channel_id).fetch_message(payload.message_id)
         except discord.errors.NotFound:
             return
     else:
