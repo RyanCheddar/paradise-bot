@@ -1,16 +1,4 @@
-import discord
-from discord.ext.commands import Bot
-from discord.utils import get
-import asyncio
-import datetime
 
-client = Bot('!')
-
-@client.event
-async def on_ready():
-    print("bot ready")
-
-@client.event
 async def on_message(message):
     if message.content.startswith("p!report"):
         try:
