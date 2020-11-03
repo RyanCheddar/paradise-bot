@@ -29,7 +29,20 @@ async def clear(message):
         return
 
 async def say(message):
-    print("Say function in Housekeeping module Called")
+    if message.author.guild_permissions.Administrator == False:
+        await message.channel.send("No Permission. (WIP - Embed)")
+        return
+
+    await message.channel.send("What would you like to say?")
+    def check(m):
+        return m.channel == message.channel and m.author == message.author
+    try:
+        msg = await client.wait_for('message', timeout=90, check=check)
+    except asyncio.TimeoutError:
+        await message.channel.send("Say module timed out.")
+        return
+    else:
+        await message.channel.send(content=msg.content)
     return
 
 async def edit(message):

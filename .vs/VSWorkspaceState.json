@@ -1,0 +1,11 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\.github",
+    "\\.github\\workflows",
+    "\\moderation",
+    "\\utilities"
+  ],
+  "SelectedNode": "\\moderation\\housekeeping.py",
+  "PreviewInSolutionExplorer": false
+}
