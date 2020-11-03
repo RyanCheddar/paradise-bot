@@ -1,5 +1,4 @@
-
-async def on_message(message):
+async def report(message):
     if message.content.startswith("p!report"):
         try:
             reportcontent = message.content.split(None, 1)[1]
