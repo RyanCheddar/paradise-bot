@@ -22,7 +22,7 @@ ipgrab = ["GRABIFYLINK", "LEANCODINGCO", "SIOPIFY", "FREEGIFICARDSCO", "CURIOUSC
 blocked_word = ['NIGGA', 'NIGGER', "NIGG", "REGIN", "IMAGPX", "REGGIN", "FAGGOT", "RETARD"]
 secretcode = ['p!autodelete']
 
-@client.event
+@ client.event
 async def on_raw_reaction_add(payload):
     emoji = str(payload.emoji)
     if payload.event_type == 'REACTION_ADD':
@@ -38,11 +38,11 @@ async def on_raw_reaction_add(payload):
     else:
         return
 
-@client.event
+@ client.event
 async def on_member_update(before,after):
     await moderation.scanning.nickname(before, after)
 
-@client.event
+@ client.event
 async def on_message(message):
     if message.author.bot:
         return
@@ -51,22 +51,23 @@ async def on_message(message):
         return
 
     commands={
-        'p!clear' : moderation.housekeeping.clear,
-        'p!youtube-ping' : utilities.pings.youtube_ping,
-        'p!ping-specialist' : utilities.pings.specialist_ping,
-        'p!event-ping' : utilities.pings.event_ping,
-        'p!say' : moderation.housekeeping.say,
-        'p!edit' : moderation.housekeeping.edit,
-        'p!react' : moderation.housekeeping.react
+        ['p!clear'] : moderation.housekeeping.clear,
+        ['p!youtube-ping', 'p!youtubeping'] : utilities.pings.youtube_ping,
+        ['p!specialist-ping', 'p!specialistping'] : utilities.pings.specialist_ping,
+        ['p!event-ping', 'p!eventping'] : utilities.pings.event_ping,
+        ['p!say', 'p!send'] : moderation.housekeeping.say,
+        ['p!edit'] : moderation.housekeeping.edit,
+        ['p!react'] : moderation.housekeeping.react
         }
     
     if message.content.startswith('p!')==True:
-        if message.content.split()[0] in commands:
-            await commands[message.content.split()[0]](message)
-            return
+        for x in commands:
+            if message.content.split()[0] in x:
+                await commands[x](message)
+                return
 
 
-@client.event
+@ client.event
 async def on_message_edit(before, after):
     await moderation.scanning.messages(before, after)
 
@@ -74,7 +75,7 @@ async def log(text):
     devlog = client.get_channel(int("683331960705515570"))
     await devlog.send(text)
 
-@client.event
+@ client.event
 async def on_ready():
     print("====================")
     print("Paradise Bot Started")
