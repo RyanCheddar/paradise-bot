@@ -1,2 +1,2 @@
-When summoning satan just isn't fun enough, you code a discord bot
+[![CodeFactor](https://www.codefactor.io/repository/github/ryancheddar/paradise-bot/badge)](https://www.codefactor.io/repository/github/ryancheddar/paradise-bot)
 
