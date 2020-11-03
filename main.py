@@ -1,5 +1,15 @@
 # RYAN HOW THE FUCK DO I ADD THE REPORT SYSTEM HERE THE COOL WAY YOU DID BY SOMEHOW GETTING THE CODE FROM THE OTHER FILES AND MAKING IT WORK HERE LIKE THE IMPORT THING DOWN THERE
 # IM TOO CONFUSED REEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+#    commands={
+#        ['p!clear'] : moderation.housekeeping.clear,
+#        ['p!youtube-ping', 'p!youtubeping'] : utilities.pings.youtube_ping,
+#        ['p!specialist-ping', 'p!specialistping'] : utilities.pings.specialist_ping,
+#        ['p!event-ping', 'p!eventping'] : utilities.pings.event_ping,
+#        ['p!say', 'p!send'] : moderation.housekeeping.say,
+#        ['p!edit'] : moderation.housekeeping.edit,
+#        ['p!react'] : moderation.housekeeping.react
+#        }
+# like this thing how does it work
 import asyncio
 import discord
 import pickle
