@@ -18,6 +18,8 @@ Database = mysql.connector.connect(
 from time import strftime
 strftime("%Y-%m-%d %H:%M:%S")
 from threading import Thread
+from dotenv import load_dotenv
+TOKEN = os.getenv('DISCORD_TOKEN')
 Cursor=Database.cursor()
 Cursor.execute("USE ParadiseBot")
 ipgrab = ["GRABIFYLINK", "LEANCODINGCO", "SIOPIFY", "FREEGIFICARDSCO", "CURIOUSCAICLUB", "CAISNIHINGSFUN", "JOINMYSIIE",
@@ -464,5 +466,4 @@ async def BadName(member, message):
             return
 
 
-#bot.run("Njc5NjQ3NzY2MjgwMDExODMz.Xk0ZTg.LDopJ-_qwinU8Vt_-_Aa4Uz2rPg")
-bot.run("NzYxOTcwNDc3NTMwNzQyNzg0.X3iWTg.4q0VoswUgpRpcdJtAhLNKmOsPTs")
+bot.run(TOKEN)
