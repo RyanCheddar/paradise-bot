@@ -4,8 +4,11 @@
     "\\.github",
     "\\.github\\workflows",
     "\\moderation",
+    "\\premium",
+    "\\rewards",
+    "\\ticketing",
     "\\utilities"
   ],
-  "SelectedNode": "\\main.py",
+  "SelectedNode": "\\rewards\\balance.py",
   "PreviewInSolutionExplorer": false
 }

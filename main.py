@@ -63,7 +63,7 @@ async def on_message(message):
         ['p!say', 'p!send'] : moderation.housekeeping.say,
         ['p!edit'] : moderation.housekeeping.edit,
         ['p!react'] : moderation.housekeeping.react,
-        ['p!report'] : moderation.reportsystem.report
+        ['p!report'] : moderation.reportsystem.report,
         }
     
     if message.content.startswith('p!')==True:
