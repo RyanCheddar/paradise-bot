@@ -11,21 +11,21 @@ async def clear(message):
 
     amount = int(message.content.split()[1])
     embed=discord.Embed(title=f'Are you sure you want to clear {message.content.split(None, 1)[1]} messages?', description="Please do `p!confirm` to confirm this action.", color=0xe22400)
-    embed.set_footer(text="Paradise Bot")
+    embed.set_footer(text="Housekeeping | Message Clearing")
     msg = await message.channel.send(content=message.author.mention, delete_after=20, embed=embed)
     def check(m):
-        return m.content == 'p!confirm' and m.channel == channel and m.author == message.author
+        return m.content.lower() == 'p!confirm' and m.channel == channel and m.author == message.author
     
     try:
         msg = await client.wait_for('message', timeout=15.0, check=check)
     except asyncio.TimeoutError:
-        await abcdefg.edit(content='I did not receive confirmation in time. Oh well.', delete_after=5)
+        await abcdefg.edit(content='I did not receive confirmation in time. Oh well.', embed=None, delete_after=5)
         await message.delete(delay=5)
     
     else:
         await channel.purge(limit=int(message.content.split(None, 1)[1]) + int('3'))
         await message.channel.send(content='Successfully deleted ' + message.content.split(None, 1)[1] + ' messages!', delete_after=5)
-        await log(f"{message.author.name} ({message.author.mention}) deleted {amount} messages in {message.channel.mention}.")
+        await log("Message Clearing", f"{message.author.name} ({message.author.mention}) cleared {amount} messages in {message.channel.mention}.")
         return
 
 async def say(message):

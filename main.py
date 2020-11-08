@@ -22,7 +22,12 @@ ipgrab = ["GRABIFYLINK", "LEANCODINGCO", "SIOPIFY", "FREEGIFICARDSCO", "CURIOUSC
 blocked_word = ['NIGGA', 'NIGGER', "NIGG", "REGIN", "IMAGPX", "REGGIN", "FAGGOT", "RETARD"]
 secretcode = ['p!autodelete']
 
-@ client.event
+async def log(action, description):
+    embed=discord.Embed(title=action, description=description, color=0xe22400)
+    embed.set_footer(text="Action Logging")
+    await client.get_channel(683331960705515570).send(embed=embed)
+
+@client.event
 async def on_raw_reaction_add(payload):
     emoji = str(payload.emoji)
     if payload.event_type == 'REACTION_ADD':
@@ -38,11 +43,11 @@ async def on_raw_reaction_add(payload):
     else:
         return
 
-@ client.event
+@client.event
 async def on_member_update(before,after):
     await moderation.scanning.nickname(before, after)
 
-@ client.event
+@client.event
 async def on_message(message):
     if message.author.bot:
         return
@@ -51,7 +56,7 @@ async def on_message(message):
         return
 
     commands={
-        ['p!clear'] : moderation.housekeeping.clear,
+        ['p!clear', 'p!purge'] : moderation.housekeeping.clear,
         ['p!youtube-ping', 'p!youtubeping'] : utilities.pings.youtube_ping,
         ['p!specialist-ping', 'p!specialistping'] : utilities.pings.specialist_ping,
         ['p!event-ping', 'p!eventping'] : utilities.pings.event_ping,
@@ -63,12 +68,12 @@ async def on_message(message):
     
     if message.content.startswith('p!')==True:
         for x in commands:
-            if message.content.split()[0] in x:
+            if message.content.split()[0].lower() in x:
                 await commands[x](message)
                 return
 
 
-@ client.event
+@client.event
 async def on_message_edit(before, after):
     await moderation.scanning.messages(before, after)
 
@@ -76,7 +81,7 @@ async def log(text):
     devlog = client.get_channel(int("683331960705515570"))
     await devlog.send(text)
 
-@ client.event
+@client.event
 async def on_ready():
     print("====================")
     print("Paradise Bot Started")
