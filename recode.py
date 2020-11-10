@@ -9,6 +9,7 @@ from discord.utils import get
 import discord.errors
 bot = discord.Client()
 import mysql.connector
+import os
 Database = mysql.connector.connect(
   host="localhost",
   user="root",
@@ -19,7 +20,8 @@ from time import strftime
 strftime("%Y-%m-%d %H:%M:%S")
 from threading import Thread
 from dotenv import load_dotenv
-TOKEN = os.getenv('DISCORD_TOKEN')
+load_dotenv()
+TOKEN = os.getenv("DISCORD_TOKEN")
 Cursor=Database.cursor()
 Cursor.execute("USE ParadiseBot")
 ipgrab = ["GRABIFYLINK", "LEANCODINGCO", "SIOPIFY", "FREEGIFICARDSCO", "CURIOUSCAICLUB", "CAISNIHINGSFUN", "JOINMYSIIE",
@@ -30,7 +32,6 @@ secretcode = ['p!autodelete']
 time_convert = {"s": 1, "m": 60, "h": 3600, "d": 86400}
 Invalid_Time = discord.Embed(title="Invalid Time format",description="'s' for seconds\n'm' for minutes\n'h for hours'\n 'd' for days\n 'w' for weeks",color=0x00ff00)
 Invalid_Time.add_field(name="Please use this format", value="This is not case sensitive",inline=False)
-
 async def read_member_id(members):
     members_list:list=[]
     for member in members:
@@ -69,35 +70,67 @@ async def time_future(duration):
 
 
 async def transactionmanager():
+    global transactionmanager_online
+    transactionmanager_online=True
+    print (transactionmanager_online)
+    print ("Transaction Manager online")
     while True:
-        Cursor.execute("SELECT * FROM Transactions WHERE Transaction='unban'")
-        to_unban=Cursor.fetchall()
-        print (to_unban)
-        for check in to_unban:
-            timer=check[1]
-            time_now=datetime.datetime.now(datetime.timezone.utc)
-            print (time_now)
-            time_now=await unaware_timezone(time_now)
-            print(timer,time_now)            
-            if timer<=time_now:
-                print ("checked timer")
-                user_id=check[0]
-                try:
-                    user=bot.fetch_user(user_id)
-                except discord.errors.NotFound:
-                    print ("user not found at the time of unban.")
-                else:
-                    guild=bot.fetch_guild(674474377286516736)
-                    bot.guild.unban(user,reason="Automatic Unban.")
-        time.sleep(120)
-def between_callback():
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
+        transactionmanager_online=True
+        print (transactionmanager_online)
+        await transactionmanager_core()
+        await asyncio.sleep(120)
 
-    loop.run_until_complete(transactionmanager())
-    loop.close()
-Thread(target=between_callback, args=[]).start()
-        
+async def transactionmanager_core():
+    Cursor.execute("SELECT * FROM Transactions WHERE Transaction='unban'")
+    to_unban=Cursor.fetchall()
+    print (to_unban)
+    for check in to_unban:
+        timer=check[1]
+        time_now=datetime.datetime.now(datetime.timezone.utc)
+        print (time_now)
+        time_now=await unaware_timezone(time_now)
+        print(timer,time_now)            
+        if timer<=time_now:
+            print ("checked timer")
+            user_id=check[0]
+            try:
+                user=await bot.fetch_user(int(user_id))
+            except discord.errors.NotFound:
+                print ("user not found at the time of unban.")
+            else:
+                guild=bot.get_guild(int(674474377286516736))
+                print (guild)
+                await guild.unban(user,reason="Automatic Unban.")
+            Cursor.execute(f"DELETE FROM Transactions WHERE User_id={user_id} AND Transaction='unban'")
+    Cursor.execute("SELECT * FROM Transactions WHERE Transaction='unmute'")
+    to_unmute=Cursor.fetchall()
+    print (to_unmute)
+    for check in to_unmute:
+        timer=check[1]
+        time_now=datetime.datetime.now(datetime.timezone.utc)
+        print (time_now)
+        time_now=await unaware_timezone(time_now)
+        print(timer,time_now)            
+        if timer<=time_now:
+            print ("checked timer")
+            user_id=check[0]
+            guild=bot.get_guild(int(674474377286516736))
+            #print (guild,guild.members)
+            #print (type(guild),type(guild.members))
+            try:
+                user=await guild.fetch_member(int(user_id))
+                print (user)
+            except discord.errors.NotFound:
+                print ("user not found at the time of unmute.")
+            else:
+                role_check = discord.utils.get(guild.roles, name="Muted")
+                if role_check in user.roles:
+                    mute_role = get(guild.roles, name="Muted")
+                    await user.remove_roles(mute_role)
+                else:
+                    print("The person was already unmuted at the time of unmute")           
+                Cursor.execute(f"DELETE FROM Transactions WHERE User_id={user_id} AND Transaction='unmute'")
+
 
 
 
@@ -184,10 +217,25 @@ async def ban(ctx):
                        print (reason)
                    except asyncio.TimeoutError:
                        await ctx.channel.send("Oh Well, I did not get the reason in time, too bad i can't ban without reason :(",delete_after=5)
-                   else:
-                       await ctx.guild.ban(banned,reason=reason,delete_message_days=0)
+                       return
+               await ctx.guild.ban(banned,reason=reason,delete_message_days=0)
+               prepare=f'''SELECT MAX(`case_id`) FROM PunishmentLogs'''
+               Cursor.execute(prepare)
+               case_id=Cursor.fetchall()
+               print("Heres the case_id: ",case_id)
+               case_id=(case_id[0][0])
+               try:
+                   case_id=int(case_id)
+               except:
+                   case_id=0
                else:
-                await ctx.guild.ban(banned,reason=reason,delete_message_days=0)
+                   case_id+=1
+               time_now=datetime.datetime.now(datetime.timezone.utc)
+               time_now=await unaware_timezone(time_now)
+               prepare=f'''INSERT INTO PunishmentLogs (`User_id`,`Duration`,`reason`,`Mod`,`action`,`time`,`case_id`)
+               VALUES ('{banned_id}','Null','{reason}','{str(member.id)}','ban','{time_now}','{case_id}')'''
+               await ctx.channel.send(prepare)
+               Cursor.execute(prepare)
     else:
         await channel.send("You do you not have the perms to do this",delete_after=5)
 async def convert_possible_time_to_sec(possible_time):
@@ -232,6 +280,22 @@ async def convert_possible_time_to_sec(possible_time):
     data=[sec,int(len(possible_time)-1)]
     return data
 
+async def start_transactionmanager(ctx):
+    try:
+        if transactionmanager_online==False:
+            print ("Offline")
+    except NameError:
+        await ctx.channel.send("Somehow The transaction manager was offline.... \nTurned it on.",delete_after=10)
+        await transactionmanager()
+    else:
+        await ctx.channel.send("Transaction manager was already online! \nDo `p!forceupdate` incase you want to force refresh the transactions",delete_after=10)
+
+async def transactionmanager_forceupdate(ctx):
+    msg = await ctx.channel.send("Force updating transactions.....")
+    await transactionmanager_core()
+    await msg.edit(content="Successfully Updated transactions!",delete_after=10)
+
+
 async def TempBan(ctx):
     member=ctx.author
     channel=ctx.channel
@@ -249,7 +313,7 @@ async def TempBan(ctx):
         try:
            banned=await bot.fetch_user(banned_id)
         except discord.errors.NotFound:
-           embed=discord.Embed(title="Member Not Found",description="either the member id is wrong or the member is not in this server",timestamp=datetime.datetime.now(datetime.timezone.utc),color=16711680)
+           embed=discord.Embed(title="Member Not Found",description="either the member id is wrong or the member disabled/deleted their account",timestamp=datetime.datetime.now(datetime.timezone.utc),color=16711680)
            embed.set_footer(text="Paradise Bot")
            await ctx.channel.send(embed=embed,delete_after=5)
            return
@@ -314,10 +378,216 @@ async def TempBan(ctx):
             await ctx.channel.send(f'''INSERT INTO Transactions (User_id,Duration,reason,Transaction,`Mod`)
             VALUES ({banned_id},{time_in_future},'{reason}','unban','{member.id}')''')     
             Cursor.execute(f'''INSERT INTO Transactions (User_id,Duration,reason,Transaction,`Mod`)
-            VALUES ('{banned_id}','{time_in_future}','{reason}','unban','{str(member.id)}')''')
-   
+            VALUES ('{banned_id}','{await unaware_timezone(time_in_future)}','{reason}','unban','{str(member.id)}')''')
+            prepare=f'''SELECT MAX(`case_id`) FROM PunishmentLogs'''
+            Cursor.execute(prepare)
+            case_id=Cursor.fetchall()
+            print("Heres the case_id: ",case_id)
+            case_id=(case_id[0][0])
+            try:
+                case_id=int(case_id)
+            except:
+                case_id=0
+            else:
+                case_id+=1
+            time_now=datetime.datetime.now(datetime.timezone.utc)
+            time_now=await unaware_timezone(time_now)
+            prepare=f'''INSERT INTO PunishmentLogs (`User_id`,`Duration`,`reason`,`Mod`,`action`,`time`,`case_id`)
+            VALUES ('{banned_id}','{sec}','{reason}','{str(member.id)}','tempban','{time_now}','{case_id}')'''
+            await ctx.channel.send(prepare)
+            Cursor.execute(prepare)
     else:
         await channel.send("You do you not have the perms to do this",delete_after=5)
+
+
+async def Tempmute(ctx):
+    member=ctx.author
+    channel=ctx.channel
+    content=ctx.content
+    try:
+        await ctx.delete()
+    except discord.errors.NotFound:
+        print ("not found")
+    if member.guild_permissions.mute_members:
+        content_split=await split(content,2)
+        print (content_split)
+        muted_id=content_split[1]
+        muted_id=await get_digit(muted_id)
+        muted_id=int(muted_id)
+        print ('muted-id: ',muted_id)
+        try:
+           muted=await ctx.guild.fetch_member(muted_id)
+        except discord.errors.NotFound:
+           embed=discord.Embed(title="Member Not Found",description="either the member id is wrong or the member is not in this server",timestamp=datetime.datetime.now(datetime.timezone.utc),color=16711680)
+           embed.set_footer(text="Paradise Bot")
+           await ctx.channel.send(embed=embed,delete_after=5)
+           print ('muted-id: ',muted_id)
+           return
+        if muted==None:
+           print (muted_id,muted)
+           embed=discord.Embed(title="Member Not Found",description="either the member id is wrong or the member is not in this server",timestamp=datetime.datetime.now(datetime.timezone.utc),color=16711680)
+           embed.set_footer(text="Paradise Bot")
+           await ctx.channel.send(embed=embed,delete_after=5)
+           return
+        possible_time=await split(content_split[2],9999)
+        print (possible_time)
+        #del possible_time(5)
+        sec=await convert_possible_time_to_sec(possible_time)
+        print ("sec was: ",sec)
+        reason_worded=possible_time[sec[1]:]
+        reason = ' '.join([str(elem) for elem in reason_worded])
+        sec_human=possible_time[0:sec[1]]
+        sec:str = sec[0]
+        if str(sec)=="0":
+            await ctx.channel.send(embed=Invalid_Time)
+            return
+        sec_human = ' '.join([str(elem) for elem in sec_human])
+        if reason=="":
+            def check(ctx):
+                       print("checking for reason")
+                       return ctx.channel == channel and ctx.author == member
+            try:
+                embed=discord.Embed(title="Muting member",description=f"Why do you want to mute <@{muted_id}> for {sec_human}",color=16711680,timestamp=datetime.datetime.now(datetime.timezone.utc))
+                embed.set_footer(text="Paradise Bot")
+                await ctx.channel.send(embed=embed,delete_after=15)
+                print("checking for reason")
+                reason = await bot.wait_for('message', timeout=15.0, check=check)
+                reason=reason.content
+                print (reason)
+            except asyncio.TimeoutError:
+                await ctx.channel.send("Oh Well, I did not get the reason in time, too bad i can't mute without reason :(",delete_after=5)
+        await ctx.channel.send(f"Heres the time in calc in (sec): {sec} \n Reason: {reason}")
+        done:bool=False
+        while done==False:
+            try:
+                Cursor.execute("SELECT User_id FROM Transactions WHERE Transaction='unmute'")
+            except mysql.connector.errors.DatabaseError:
+                await asyncio.sleep(2)
+                Cursor.execute("SELECT User_id FROM Transactions WHERE Transaction='unmute'")
+                done=True
+            else:
+                done=True
+        members_on_cooldown = Cursor.fetchall()
+        print (members_on_cooldown)
+        members_on_cooldown=await read_member_id(members_on_cooldown)
+        if str(muted_id) in members_on_cooldown:
+            print ("hes on cooldown")
+            Cursor.execute(f"""SELECT * FROM Transactions 
+            WHERE User_id='{str(muted_id)}'
+            AND Transaction= 'unmute'""")
+            cooldown_info = Cursor.fetchall()
+            cooldown_info=cooldown_info[0]
+            print (cooldown_info)
+            duration=cooldown_info[1]
+            print("cooldown value: ", duration)
+            duration = str(duration)
+            reason=str(cooldown_info[2])
+            await channel.send(f"That Person is muted until {duration} UTC \n Reason: {reason}", delete_after=10)
+            return
+        else:
+            role_check = discord.utils.get(ctx.guild.roles, name="Muted")
+            if role_check in muted.roles:
+                await ctx.channel.send("That person is already muted, someone other bot/ admin have muted them.")
+                return
+            mute_role = get(member.guild.roles, name="Muted")
+            await muted.add_roles(mute_role)
+            time_in_future=await time_future(sec)
+            prepare=f'''INSERT INTO Transactions (User_id,Duration,reason,Transaction,`Mod`)
+            VALUES ('{muted_id}','{await unaware_timezone(time_in_future)}','{reason}','unmute','{str(member.id)}')'''
+            #await ctx.channel.send(prepare)     
+            Cursor.execute(prepare)
+            time_now=datetime.datetime.now(datetime.timezone.utc)
+            time_now=await unaware_timezone(time_now)
+            prepare=f'''SELECT MAX(`case_id`) FROM PunishmentLogs'''
+            Cursor.execute(prepare)
+            case_id=Cursor.fetchall()
+            print("Heres the case_id: ",case_id)
+            case_id=(case_id[0][0])
+            try:
+                case_id=int(case_id)
+            except:
+                case_id=0
+            else:
+                case_id+=1
+            prepare=f'''INSERT INTO PunishmentLogs (`User_id`,`Duration`,`reason`,`Mod`,`action`,`time`,`case_id`)
+            VALUES ('{muted_id}','{sec}','{reason}','{str(member.id)}','tempmute','{time_now}','{case_id}')'''
+            await ctx.channel.send(prepare)
+            Cursor.execute(prepare)
+    else:
+        await channel.send("You do you not have the perms to do this",delete_after=5)
+
+async def logs_user(ctx):
+    member=ctx.author
+    channel=ctx.channel
+    content=ctx.content
+    try:
+        await ctx.delete()
+    except discord.errors.NotFound:
+        print ("not found")
+    if member.guild_permissions.mute_members:
+        content_split=await split(content,2)
+        print (content_split)
+        log_id=content_split[1]
+        log_id=await get_digit(log_id)
+        log_id=int(log_id)
+        print ('log-id: ',log_id)
+        try:
+            page_no=await get_digit(content_split[2])
+            page_no=int(page_no)
+        except IndexError:
+            page_no:int=0
+        if page_no=='':
+            page_no:int=0
+        try:
+           log_user=await bot.fetch_user(log_id)
+           print ("the user i found: ",log_user)
+        except discord.errors.NotFound:
+            embed=discord.Embed(title="Member Not Found",description="The member id is wrong",timestamp=datetime.datetime.now(datetime.timezone.utc),color=16711680)
+            embed.set_footer(text="Paradise Bot")
+            await ctx.channel.send(embed=embed,delete_after=5)
+            return
+        if log_user==None:
+            embed=discord.Embed(title="Member Not Found",description="The member id is wrong",timestamp=datetime.datetime.now(datetime.timezone.utc),color=16711680)
+            embed.set_footer(text="Paradise Bot")
+            await ctx.channel.send(embed=embed,delete_after=5)
+            return
+        prepare=f'''SELECT * FROM PunishmentLogs WHERE `User_id`='{log_id}'
+        ORDER BY case_id DESC'''
+        Cursor.execute(prepare)
+        cases=Cursor.fetchall()
+        print(cases)
+        if len(cases)<1:
+            await channel.send("The Person has no punishment in logs")
+            return
+        pages:list=[]
+        page_carry:list=[]
+        for item in enumerate(cases):
+            count=item[0]
+            count=int(count)
+            page_carry.append(count)
+            if count%10==9%10:
+                pages.append(page_carry)
+                page_carry=['class helper']
+                page_carry.clear()
+        if len(page_carry)>0:
+            pages.append(page_carry)
+        print (page_carry)
+        print ("\n",pages)
+        print ("\n \n")
+        try:
+            page=pages[page_no]
+        except IndexError:
+            page=pages[0]
+        embed=discord.Embed(title=f"{log_user}",timestamp=datetime.datetime.now(datetime.timezone.utc),color=16711680)
+        embed.set_footer(text="Paradise Bot")
+        embed.set_thumbnail(url=log_user.avatar_url)
+        for page_number in page:
+            page_number=int(page_number)
+            case=cases[page_number]
+            embed.add_field(name=f"Case #{case[6]} - {case[4]}", value=case[2], inline=False)
+        await ctx.channel.send(embed=embed)
+        
+
 
 async def check_url(content):
     urls = re.findall('(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-?=%.]+',content.replace(",", ".").replace(" .", ".").lower())
@@ -417,7 +687,11 @@ async def on_message(ctx):
     await staff_ping_check(ctx)
     if content.startswith('p!')==True:
         commands={"p!ban":ban,
-        "p!tempban":TempBan
+        "p!tempban":TempBan,
+        "p!start-transactionmanager":start_transactionmanager,
+        "p!forceupdate-transaction":transactionmanager_forceupdate,
+        "p!tempmute":Tempmute,
+        "p!punishments":logs_user
         }
         content_str=str(split_content[0])
 
@@ -431,8 +705,7 @@ async def on_message(ctx):
 @bot.event
 async def on_ready():
     print("ready")
-
-        
+    await transactionmanager()      
 
 @bot.event
 async def on_message_edit(before, after):
@@ -465,5 +738,5 @@ async def BadName(member, message):
         except discord.HTTPException:
             return
 
-
+print ("TOKEN IS: ",TOKEN)
 bot.run(TOKEN)
