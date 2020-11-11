@@ -214,6 +214,7 @@ async def ban(ctx):
                        await ctx.channel.send(embed=embed,delete_after=15)
                        print("checking for reason")
                        reason = await bot.wait_for('message', timeout=15.0, check=check)
+                       reason=reason.content
                        print (reason)
                    except asyncio.TimeoutError:
                        await ctx.channel.send("Oh Well, I did not get the reason in time, too bad i can't ban without reason :(",delete_after=5)
@@ -233,7 +234,7 @@ async def ban(ctx):
                time_now=datetime.datetime.now(datetime.timezone.utc)
                time_now=await unaware_timezone(time_now)
                prepare=f'''INSERT INTO PunishmentLogs (`User_id`,`Duration`,`reason`,`Mod`,`action`,`time`,`case_id`)
-               VALUES ('{banned_id}','Null','{reason}','{str(member.id)}','ban','{time_now}','{case_id}')'''
+               VALUES ('{banned_id}','0','{reason}','{str(member.id)}','ban','{time_now}','{case_id}')'''
                await ctx.channel.send(prepare)
                Cursor.execute(prepare)
     else:
@@ -524,7 +525,7 @@ async def logs_user(ctx):
         await ctx.delete()
     except discord.errors.NotFound:
         print ("not found")
-    if member.guild_permissions.mute_members:
+    if member.guild_permissions.kick_members:
         content_split=await split(content,2)
         print (content_split)
         log_id=content_split[1]
@@ -578,7 +579,7 @@ async def logs_user(ctx):
             page=pages[page_no]
         except IndexError:
             page=pages[0]
-        embed=discord.Embed(title=f"{log_user}",timestamp=datetime.datetime.now(datetime.timezone.utc),color=16711680)
+        embed=discord.Embed(title=f"{log_user} ({int(log_id)})",timestamp=datetime.datetime.now(datetime.timezone.utc),color=16711680)
         embed.set_footer(text="Paradise Bot")
         embed.set_thumbnail(url=log_user.avatar_url)
         for page_number in page:
@@ -586,8 +587,213 @@ async def logs_user(ctx):
             case=cases[page_number]
             embed.add_field(name=f"Case #{case[6]} - {case[4]}", value=case[2], inline=False)
         await ctx.channel.send(embed=embed)
-        
+async def sec_to_time(sec):
+    sec=int(sec)
+    day = sec // (24 * 3600)
+    sec = sec % (24 * 3600)
+    hour = sec // 3600
+    sec %= 3600
+    minutes = sec // 60
+    sec %= 60
+    seconds = sec
+    time_human:str=""
+    if day>0:
+        time_human=time_human+f"{day} days"
+    if hour>0:
+        time_human=time_human+f"{hour} hours"
+    if minutes>0:
+        time_human=time_human+f"{minutes} mins"
+    if seconds>0:
+        time_human=time_human+f"{seconds} seconds"
+    return time_human
 
+
+async def case(ctx):
+    member=ctx.author
+    channel=ctx.channel
+    content=ctx.content
+    try:
+        await ctx.delete()
+    except discord.errors.NotFound:
+        print ("not found")
+    if member.guild_permissions.kick_members:
+        content_split=await split(content,2)
+        item_id=content_split[1]
+        item_id=await get_digit(item_id)
+        try:
+            item_id=int(item_id)
+        except:
+            channel.send("Invalid item id")
+            return
+        prepare=f'''Select * From PunishmentLogs WHERE `case_id`='{item_id}' '''
+        Cursor.execute(prepare)
+        Case=Cursor.fetchall()
+        try:
+            Case=Case[0]
+        except IndexError:
+            await channel.send("No such case found!")
+            return
+        log_user=await bot.fetch_user(int(Case[3]))
+        print ("log user-: ",log_user,"\nId: ",int(Case[3]))
+        offender=await bot.fetch_user(int(Case[0]))
+        print ("Offender user-: ",offender,"\nId: ",int(Case[0]))
+        duration=Case[1]
+        duration = await sec_to_time(int(duration))
+        if duration=="":
+            duration="Doesn't Apply to bans and warns"
+        print ("Heres the duration: ",duration)
+        embed=discord.Embed(title=f"{offender} ({int(Case[3])})",timestamp=Case[5],color=16711680,description=f"**Moderator: **{log_user}\n**Action: **{Case[4]}\n**Duration: **{duration}\n**Reason: **{Case[2]}")
+        embed.set_footer(text=f"Paradise Bot  - Case #{Case[6]}")
+        embed.set_thumbnail(url=offender.avatar_url)
+        await channel.send(embed=embed)
+            
+async def remove_case(ctx):
+    member=ctx.author
+    channel=ctx.channel
+    content=ctx.content
+    try:
+        await ctx.delete()
+    except discord.errors.NotFound:
+        print ("not found")
+    if member.guild_permissions.kick_members:
+        content_split=await split(content,2)
+        item_id=content_split[1]
+        item_id=await get_digit(item_id)
+        try:
+            item_id=int(item_id)
+        except:
+            channel.send("Invalid item id")
+            return
+        prepare=f'''Select * From PunishmentLogs WHERE `case_id`='{item_id}' '''
+        Cursor.execute(prepare)
+        Case=Cursor.fetchall()
+        try:
+            Case=Case[0]
+        except IndexError:
+            await channel.send("No such case found!")
+            return
+        prepare=f'''DELETE FROM PunishmentLogs WHERE `case_id`='{item_id}' '''
+        Cursor.execute(prepare)
+        embed=discord.Embed(title=f"Case - #{int(Case[6])}",description=f"Case#{int(Case[6])} has been sucessfully deleted!",timestamp=datetime.datetime.now(datetime.timezone.utc),color=16711680)
+        embed.set_footer(text=f"Paradise Bot  - Case #{Case[6]}",icon_url=member.avatar_url)
+        await channel.send(embed=embed)
+
+
+async def change_reason(ctx):
+    member=ctx.author
+    channel=ctx.channel
+    content=ctx.content
+    try:
+        await ctx.delete()
+    except discord.errors.NotFound:
+        print ("not found")
+    if member.guild_permissions.kick_members:
+        content_split=await split(content,2)
+        item_id=content_split[1]
+        item_id=await get_digit(item_id)
+        try:
+            item_id=int(item_id)
+        except:
+            channel.send("Invalid item id")
+            return
+        prepare=f'''Select * From PunishmentLogs WHERE `case_id`='{item_id}' '''
+        Cursor.execute(prepare)
+        Case=Cursor.fetchall()
+        try:
+            Case=Case[0]
+        except IndexError:
+            await channel.send("No such case found!")
+            return
+        try:
+            reason=content_split[2]
+        except IndexError:
+            await channel.send("Please enter a valid reason to add")
+            return
+        if reason=='':
+            await channel.send("Please enter a valid reason to add")
+            return
+        prepare=f'''DELETE FROM PunishmentLogs WHERE `case_id`='{item_id}' '''
+        Cursor.execute(prepare)
+        prepare=f'''INSERT INTO PunishmentLogs (`User_id`,`Duration`,`reason`,`Mod`,`action`,`time`,`case_id`)
+            VALUES ('{Case[0]}','{Case[1]}','{reason}','{Case[3]}','{Case[4]}','{Case[5]}','{Case[6]}')'''
+        await channel.send(prepare)
+        Cursor.execute(prepare)
+        embed=discord.Embed(title=f"Case - #{int(Case[6])}",description=f"**Case #{int(Case[6])}** Reason has been sucessfully updated!\n**Old reason: **{Case[2]}\n**New reason: **{reason}",timestamp=datetime.datetime.now(datetime.timezone.utc),color=16711680)
+        embed.set_footer(text=f"Paradise Bot  - Case #{Case[6]}",icon_url=member.avatar_url)
+        await channel.send(embed=embed)
+
+
+async def warn(ctx):
+    try:
+        await ctx.delete()
+    except discord.NotFound:
+        print ("ctx not found D:")
+    content=ctx.content
+    member=ctx.author
+    channel=ctx.channel
+    print (member.id,type(member.id))
+    if member.guild_permissions.manage_messages:
+           print ("has perms")
+           content_split=await split(content,2)
+           warned_id=await get_digit(content_split[1])
+           warned_id=int(warned_id)
+           try:
+               warned=await bot.fetch_user(warned_id)
+           except discord.errors.NotFound:
+               embed=discord.Embed(title="Member Not Found",description="either the member id is wrong or the member is not in this server",timestamp=datetime.datetime.now(datetime.timezone.utc),color=16711680)
+               embed.set_footer(text="Paradise Bot")
+               await ctx.channel.send(embed=embed,delete_after=5)
+               return
+           print ("this is to be banned: ",warned_id,warned,ctx.guild)
+           if warned==None:
+               embed=discord.Embed(title="Member Not Found",description="You need to include the Member after p!ban!",timestamp=datetime.datetime.now(datetime.timezone.utc),color=16711680)
+               embed.set_footer(text="Paradise Bot")
+               await ctx.channel.send(embed=embed,delete_after=5)
+           else:
+               try:
+                   reason=content_split[2]
+               except IndexError:
+                   def check(ctx):
+                       print("checking for reason")
+                       return ctx.channel == channel and ctx.author == member #and ctx.content.startswith()!="p!say"
+
+                   try:
+                       embed=discord.Embed(title="Warning member",description=f"Why do you want to warn <@{warned_id}>",color=16711680,timestamp=datetime.datetime.now(datetime.timezone.utc))
+                       embed.set_footer(text="Paradise Bot")
+                       await ctx.channel.send(embed=embed,delete_after=15)
+                       print("checking for reason")
+                       reason = await bot.wait_for('message', timeout=15.0, check=check)
+                       reason=reason.content
+                       print (reason)
+                   except asyncio.TimeoutError:
+                       await ctx.channel.send("Oh Well, I did not get the reason in time, too bad i can't warn without reason :(",delete_after=5)
+                       return
+               prepare=f'''SELECT MAX(`case_id`) FROM PunishmentLogs'''
+               Cursor.execute(prepare)
+               case_id=Cursor.fetchall()
+               print("Heres the case_id: ",case_id)
+               case_id=(case_id[0][0])
+               try:
+                   case_id=int(case_id)
+               except:
+                   case_id=0
+               else:
+                   case_id+=1
+               time_now=datetime.datetime.now(datetime.timezone.utc)
+               time_now=await unaware_timezone(time_now)
+               
+               embed=discord.Embed(title=f"Case #{case_id} has been registered!",color=16711680,description=f"**Moderator: **<@{int(member.id)}>\n**Action: **Warn\n**Reason: **{reason}",timestamp=datetime.datetime.now(datetime.timezone.utc))
+               dm=await warned.create_dm()
+               await dm.send(f"You have been warned in Paradise network by <@{member.id}>\n Reason of warn: {reason}")
+               embed.set_footer(text="Paradise Bot")
+               embed.set_thumbnail(url=warned.avatar_url)
+               prepare=f'''INSERT INTO PunishmentLogs (`User_id`,`Duration`,`reason`,`Mod`,`action`,`time`,`case_id`)
+               VALUES ('{warned_id}','0','{reason}','{str(member.id)}','warn','{time_now}','{case_id}')'''
+               await ctx.channel.send(prepare)
+               await ctx.channel.send(embed=embed)
+               Cursor.execute(prepare)
+    else:
+        await channel.send("You do you not have the perms to do this",delete_after=5)
 
 async def check_url(content):
     urls = re.findall('(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-?=%.]+',content.replace(",", ".").replace(" .", ".").lower())
@@ -691,7 +897,11 @@ async def on_message(ctx):
         "p!start-transactionmanager":start_transactionmanager,
         "p!forceupdate-transaction":transactionmanager_forceupdate,
         "p!tempmute":Tempmute,
-        "p!punishments":logs_user
+        "p!punishments":logs_user,
+        "p!case":case,
+        "p!removecase":remove_case,
+        "p!reason":change_reason,
+        "p!warn":warn
         }
         content_str=str(split_content[0])
 
