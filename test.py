@@ -1,7 +1,16 @@
-list1=["1",]
-list2=[1,2,3,4,5,6,7,8,9,0]
-list1.append(list2)
-list2=["Hallo"]
-list2.clear()
-print(list1)
-print(list2)
+codes={"transaction":"#HG54G5"}
+#Enter stuff into database
+string_to_bee_entered_to_database="DROP transaction;"
+#weird code magic
+#replace "DROP Transaction" with "DROP HG54G5"
+#put in the database
+
+
+
+
+#read stuff from database and make it ready for humans
+#read stuff from database
+#weird code magic
+#replace "DROP HG54G5" with "DROP Transaction"
+
+#give to human
