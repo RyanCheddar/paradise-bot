@@ -32,7 +32,8 @@ secretcode = ['p!autodelete']
 time_convert = {"s": 1, "m": 60, "h": 3600, "d": 86400}
 Invalid_Time = discord.Embed(title="Invalid Time format",description="'s' for seconds\n'm' for minutes\n'h for hours'\n 'd' for days\n 'w' for weeks",color=0x00ff00)
 Invalid_Time.add_field(name="Please use this format", value="This is not case sensitive",inline=False)
-transactionmanager_online:str='0'
+transactionmanager_online='0'
+
 async def read_member_id(members):
     members_list:list=[]
     for member in members:
@@ -78,7 +79,7 @@ async def transactionmanager():
         transactionmanager_online='1'
         print (transactionmanager_online)
         await transactionmanager_core()
-        await asyncio.sleep(120)
+        await asyncio.sleep(60)
 
 async def transactionmanager_core():
     Cursor.execute("SELECT * FROM Transactions WHERE Transaction='unban'")
