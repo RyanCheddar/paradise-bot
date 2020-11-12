@@ -32,6 +32,7 @@ secretcode = ['p!autodelete']
 time_convert = {"s": 1, "m": 60, "h": 3600, "d": 86400}
 Invalid_Time = discord.Embed(title="Invalid Time format",description="'s' for seconds\n'm' for minutes\n'h for hours'\n 'd' for days\n 'w' for weeks",color=0x00ff00)
 Invalid_Time.add_field(name="Please use this format", value="This is not case sensitive",inline=False)
+transactionmanager_online:str='0'
 async def read_member_id(members):
     members_list:list=[]
     for member in members:
@@ -70,12 +71,11 @@ async def time_future(duration):
 
 
 async def transactionmanager():
-    global transactionmanager_online
-    transactionmanager_online=True
+    transactionmanager_online='1'
     print (transactionmanager_online)
     print ("Transaction Manager online")
     while True:
-        transactionmanager_online=True
+        transactionmanager_online='1'
         print (transactionmanager_online)
         await transactionmanager_core()
         await asyncio.sleep(120)
@@ -130,6 +130,35 @@ async def transactionmanager_core():
                 else:
                     print("The person was already unmuted at the time of unmute")           
                 Cursor.execute(f"DELETE FROM Transactions WHERE User_id={user_id} AND Transaction='unmute'")
+    Cursor.execute("SELECT * FROM Transactions WHERE Transaction='unbanservice'")
+    to_unban=Cursor.fetchall()
+    print (to_unban)
+    for check in to_unban:
+        timer=check[1]
+        time_now=datetime.datetime.now(datetime.timezone.utc)
+        print (time_now)
+        time_now=await unaware_timezone(time_now)
+        print(timer,time_now)            
+        if timer<=time_now:
+            print ("checked timer")
+            user_id=check[0]
+            guild=bot.get_guild(int(674474377286516736))
+            #print (guild,guild.members)
+            #print (type(guild),type(guild.members))
+            try:
+                user=await guild.fetch_member(int(user_id))
+                print (user)
+            except discord.errors.NotFound:
+                print ("user not found at the time of unmute.")
+            else:
+                role_remove = discord.utils.get(guild.roles, name="Service Blacklisted")
+                role_add = discord.utils.get(guild.roles, name="Can see services")
+                if role_remove in user.roles:
+                    await user.add_roles(role_add)
+                    await user.remove_roles(role_remove)
+                else:
+                    print("The person was already unbanned at the time of unmute")           
+                Cursor.execute(f"DELETE FROM Transactions WHERE User_id={user_id} AND Transaction='unbanservice'")
 
 
 
@@ -219,7 +248,6 @@ async def ban(ctx):
                    except asyncio.TimeoutError:
                        await ctx.channel.send("Oh Well, I did not get the reason in time, too bad i can't ban without reason :(",delete_after=5)
                        return
-               await ctx.guild.ban(banned,reason=reason,delete_message_days=0)
                prepare=f'''SELECT MAX(`case_id`) FROM PunishmentLogs'''
                Cursor.execute(prepare)
                case_id=Cursor.fetchall()
@@ -237,7 +265,16 @@ async def ban(ctx):
                VALUES ('{banned_id}','0','{reason}','{str(member.id)}','ban','{time_now}','{case_id}')'''
                await ctx.channel.send(prepare)
                Cursor.execute(prepare)
-    else:
+               duration="Doesn't Apply to bans and warns"
+               embed=discord.Embed(title=f"Case #{case_id} has been registered!",color=16711680,description=f"**Moderator: **<@{int(member.id)}>\n**Action: **Permanent Ban\n**Duration :**{duration}\n**Reason: **{reason}",timestamp=datetime.datetime.now(datetime.timezone.utc))
+               dm=await banned.create_dm()
+               await dm.send(f"You have been banned in Paradise network by <@{member.id}>\nReason of warn: {reason}\nDuration: Permanent")
+               embed.set_footer(text="Paradise Bot")
+               embed.set_thumbnail(url=banned.avatar_url)
+               await ctx.channel.send(embed=embed)
+               await ctx.guild.ban(banned,reason=reason,delete_message_days=0)
+
+    else:  
         await channel.send("You do you not have the perms to do this",delete_after=5)
 async def convert_possible_time_to_sec(possible_time):
     seconds=["s","sec","secs","seconds","second"]
@@ -282,14 +319,17 @@ async def convert_possible_time_to_sec(possible_time):
     return data
 
 async def start_transactionmanager(ctx):
-    try:
-        if transactionmanager_online==False:
-            print ("Offline")
-    except NameError:
+    if transactionmanager_online=='0':
+        print ("Offline")
         await ctx.channel.send("Somehow The transaction manager was offline.... \nTurned it on.",delete_after=10)
         await transactionmanager()
     else:
-        await ctx.channel.send("Transaction manager was already online! \nDo `p!forceupdate` incase you want to force refresh the transactions",delete_after=10)
+        msg = await ctx.channel.send("Transaction manager seems to be online! \nConfirming its validation, please wait 90 seconds for the validation report.\nDo `p!forceupdate` incase you want to force refresh the transactions",delete_after=10)
+        transactionmanager_online='0'
+        await asyncio.sleep(90)
+        if transactionmanager_online=='0':
+            msg.edit(content="Seems like the transaction manager had crashed... turned it back on\n<@&674479154745573377> Please look into why it had crashed")
+            await transactionmanager()
 
 async def transactionmanager_forceupdate(ctx):
     msg = await ctx.channel.send("Force updating transactions.....")
@@ -397,6 +437,16 @@ async def TempBan(ctx):
             VALUES ('{banned_id}','{sec}','{reason}','{str(member.id)}','tempban','{time_now}','{case_id}')'''
             await ctx.channel.send(prepare)
             Cursor.execute(prepare)
+            duration=sec
+            duration = await sec_to_time(int(duration))
+            if duration=="":
+                duration="Doesn't Apply to bans and warns"
+            embed=discord.Embed(title=f"Case #{case_id} has been registered!",color=16711680,description=f"**Moderator: **<@{int(member.id)}>\n**Action: **Ban\n**Duration :**{duration}\n**Reason: **{reason}",timestamp=datetime.datetime.now(datetime.timezone.utc))
+            dm=await banned.create_dm()
+            await dm.send(f"You have been banned in Paradise network by <@{member.id}>\nReason of ban: {reason}\nDuration: {duration}")
+            embed.set_footer(text="Paradise Bot")
+            embed.set_thumbnail(url=banned.avatar_url)
+            await ctx.channel.send(embed=embed)
     else:
         await channel.send("You do you not have the perms to do this",delete_after=5)
 
@@ -512,6 +562,16 @@ async def Tempmute(ctx):
                 case_id+=1
             prepare=f'''INSERT INTO PunishmentLogs (`User_id`,`Duration`,`reason`,`Mod`,`action`,`time`,`case_id`)
             VALUES ('{muted_id}','{sec}','{reason}','{str(member.id)}','tempmute','{time_now}','{case_id}')'''
+            duration=sec
+            duration = await sec_to_time(int(duration))
+            if duration=="":
+                duration="Doesn't Apply to bans and warns"
+            embed=discord.Embed(title=f"Case #{case_id} has been registered!",color=16711680,description=f"**Moderator: **<@{int(member.id)}>\n**Action: **Mute\n**Duration :**{duration}\n**Reason: **{reason}",timestamp=datetime.datetime.now(datetime.timezone.utc))
+            dm=await muted.create_dm()
+            await dm.send(f"You have been muted in Paradise network by <@{member.id}>\nReason of mute: {reason}\nDuration: {duration}")
+            embed.set_footer(text="Paradise Bot")
+            embed.set_thumbnail(url=muted.avatar_url)
+            await ctx.channel.send(embed=embed)
             await ctx.channel.send(prepare)
             Cursor.execute(prepare)
     else:
@@ -641,7 +701,6 @@ async def case(ctx):
         duration = await sec_to_time(int(duration))
         if duration=="":
             duration="Doesn't Apply to bans and warns"
-        print ("Heres the duration: ",duration)
         embed=discord.Embed(title=f"{offender} ({int(Case[3])})",timestamp=Case[5],color=16711680,description=f"**Moderator: **{log_user}\n**Action: **{Case[4]}\n**Duration: **{duration}\n**Reason: **{Case[2]}")
         embed.set_footer(text=f"Paradise Bot  - Case #{Case[6]}")
         embed.set_thumbnail(url=offender.avatar_url)
@@ -746,7 +805,7 @@ async def warn(ctx):
                return
            print ("this is to be banned: ",warned_id,warned,ctx.guild)
            if warned==None:
-               embed=discord.Embed(title="Member Not Found",description="You need to include the Member after p!ban!",timestamp=datetime.datetime.now(datetime.timezone.utc),color=16711680)
+               embed=discord.Embed(title="Member Not Found",description="You need to include the Member after p!warn!",timestamp=datetime.datetime.now(datetime.timezone.utc),color=16711680)
                embed.set_footer(text="Paradise Bot")
                await ctx.channel.send(embed=embed,delete_after=5)
            else:
@@ -784,16 +843,144 @@ async def warn(ctx):
                
                embed=discord.Embed(title=f"Case #{case_id} has been registered!",color=16711680,description=f"**Moderator: **<@{int(member.id)}>\n**Action: **Warn\n**Reason: **{reason}",timestamp=datetime.datetime.now(datetime.timezone.utc))
                dm=await warned.create_dm()
-               await dm.send(f"You have been warned in Paradise network by <@{member.id}>\n Reason of warn: {reason}")
+               await dm.send(f"You have been warned in Paradise network by <@{member.id}>\nReason of warn: {reason}")
                embed.set_footer(text="Paradise Bot")
                embed.set_thumbnail(url=warned.avatar_url)
+               await ctx.channel.send(embed=embed)
                prepare=f'''INSERT INTO PunishmentLogs (`User_id`,`Duration`,`reason`,`Mod`,`action`,`time`,`case_id`)
                VALUES ('{warned_id}','0','{reason}','{str(member.id)}','warn','{time_now}','{case_id}')'''
                await ctx.channel.send(prepare)
-               await ctx.channel.send(embed=embed)
                Cursor.execute(prepare)
     else:
         await channel.send("You do you not have the perms to do this",delete_after=5)
+
+async def temp_service_ban(ctx):
+    member=ctx.author
+    channel=ctx.channel
+    content=ctx.content
+    try:
+        await ctx.delete()
+    except discord.errors.NotFound:
+        print ("not found")
+    if member.guild_permissions.mute_members:
+        content_split=await split(content,2)
+        print (content_split)
+        banned_id=content_split[1]
+        banned_id=await get_digit(banned_id)
+        banned_id=int(banned_id)
+        print ('banned-id: ',banned_id)
+        try:
+           banned=await ctx.guild.fetch_member(banned_id)
+        except discord.errors.NotFound:
+           embed=discord.Embed(title="Member Not Found",description="either the member id is wrong or the member is not in this server",timestamp=datetime.datetime.now(datetime.timezone.utc),color=16711680)
+           embed.set_footer(text="Paradise Bot")
+           await ctx.channel.send(embed=embed,delete_after=5)
+           print ('muted-id: ',banned_id)
+           return
+        if banned==None:
+           print (banned_id,banned)
+           embed=discord.Embed(title="Member Not Found",description="either the member id is wrong or the member is not in this server",timestamp=datetime.datetime.now(datetime.timezone.utc),color=16711680)
+           embed.set_footer(text="Paradise Bot")
+           await ctx.channel.send(embed=embed,delete_after=5)
+           return
+        possible_time=await split(content_split[2],9999)
+        print (possible_time)
+        #del possible_time(5)
+        sec=await convert_possible_time_to_sec(possible_time)
+        print ("sec was: ",sec)
+        reason_worded=possible_time[sec[1]:]
+        reason = ' '.join([str(elem) for elem in reason_worded])
+        sec_human=possible_time[0:sec[1]]
+        sec:str = sec[0]
+        if str(sec)=="0":
+            await ctx.channel.send(embed=Invalid_Time)
+            return
+        sec_human = ' '.join([str(elem) for elem in sec_human])
+        if reason=="":
+            def check(ctx):
+                       print("checking for reason")
+                       return ctx.channel == channel and ctx.author == member
+            try:
+                embed=discord.Embed(title="Service Banning member",description=f"Why do you want to service Ban <@{banned_id}> for {sec_human}",color=16711680,timestamp=datetime.datetime.now(datetime.timezone.utc))
+                embed.set_footer(text="Paradise Bot")
+                await ctx.channel.send(embed=embed,delete_after=15)
+                print("checking for reason")
+                reason = await bot.wait_for('message', timeout=15.0, check=check)
+                reason=reason.content
+                print (reason)
+            except asyncio.TimeoutError:
+                await ctx.channel.send("Oh Well, I did not get the reason in time, too bad i can't service ban without reason :(",delete_after=5)
+        await ctx.channel.send(f"Heres the time in calc in (sec): {sec} \n Reason: {reason}")
+        done:bool=False
+        while done==False:
+            try:
+                Cursor.execute("SELECT User_id FROM Transactions WHERE Transaction='unbanservice'")
+            except mysql.connector.errors.DatabaseError:
+                await asyncio.sleep(2)
+                Cursor.execute("SELECT User_id FROM Transactions WHERE Transaction='unbanservice'")
+                done=True
+            else:
+                done=True
+        members_on_cooldown = Cursor.fetchall()
+        print (members_on_cooldown)
+        members_on_cooldown=await read_member_id(members_on_cooldown)
+        if str(banned_id) in members_on_cooldown:
+            print ("hes on cooldown")
+            Cursor.execute(f"""SELECT * FROM Transactions 
+            WHERE User_id='{str(banned_id)}'
+            AND Transaction= 'unbanservice'""")
+            cooldown_info = Cursor.fetchall()
+            cooldown_info=cooldown_info[0]
+            print (cooldown_info)
+            duration=cooldown_info[1]
+            print("cooldown value: ", duration)
+            duration = str(duration)
+            reason=str(cooldown_info[2])
+            await channel.send(f"That Person is muted until {duration} UTC \n Reason: {reason}", delete_after=10)
+            return
+        else:
+            role_add = discord.utils.get(ctx.guild.roles, name="Service Blacklisted")
+            role_remove = discord.utils.get(ctx.guild.roles, name="Can see services")
+            if role_add in banned.roles:
+                await ctx.channel.send("That person is already muted, someone other bot/ admin have muted them.")
+                return
+            await banned.add_roles(role_add)
+            await banned.remove_roles(role_remove)
+            time_in_future=await time_future(sec)
+            prepare=f'''INSERT INTO Transactions (User_id,Duration,reason,Transaction,`Mod`)
+            VALUES ('{banned_id}','{await unaware_timezone(time_in_future)}','{reason}','unbanservice','{str(member.id)}')'''
+            #await ctx.channel.send(prepare)     
+            Cursor.execute(prepare)
+            time_now=datetime.datetime.now(datetime.timezone.utc)
+            time_now=await unaware_timezone(time_now)
+            prepare=f'''SELECT MAX(`case_id`) FROM PunishmentLogs'''
+            Cursor.execute(prepare)
+            case_id=Cursor.fetchall()
+            print("Heres the case_id: ",case_id)
+            case_id=(case_id[0][0])
+            try:
+                case_id=int(case_id)
+            except:
+                case_id=0
+            else:
+                case_id+=1
+            prepare=f'''INSERT INTO PunishmentLogs (`User_id`,`Duration`,`reason`,`Mod`,`action`,`time`,`case_id`)
+            VALUES ('{banned_id}','{sec}','{reason}','{str(member.id)}','service-ban','{time_now}','{case_id}')'''
+            duration=sec
+            duration = await sec_to_time(int(duration))
+            if duration=="":
+                duration="Doesn't Apply to bans and warns"
+            embed=discord.Embed(title=f"Case #{case_id} has been registered!",color=16711680,description=f"**Moderator: **<@{int(member.id)}>\n**Service Ban: **Warn\n**Duration :**{duration}\n**Reason: **{reason}",timestamp=datetime.datetime.now(datetime.timezone.utc))
+            dm=await banned.create_dm()
+            await dm.send(f"You have been service banned in Paradise network by <@{member.id}>\nReason of warn: {reason}\nDuration: {duration}")
+            embed.set_footer(text="Paradise Bot")
+            embed.set_thumbnail(url=banned.avatar_url)
+            await ctx.channel.send(embed=embed)
+            await ctx.channel.send(prepare)
+            Cursor.execute(prepare)
+    else:
+        await channel.send("You do you not have the perms to do this",delete_after=5)
+
 
 async def check_url(content):
     urls = re.findall('(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-?=%.]+',content.replace(",", ".").replace(" .", ".").lower())
@@ -901,7 +1088,8 @@ async def on_message(ctx):
         "p!case":case,
         "p!removecase":remove_case,
         "p!reason":change_reason,
-        "p!warn":warn
+        "p!warn":warn,
+        "p!serviceban":temp_service_ban
         }
         content_str=str(split_content[0])
 
