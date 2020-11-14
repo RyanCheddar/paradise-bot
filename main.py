@@ -15,6 +15,7 @@ import ticketing
 import utilities
 
 client = discord.Client()
+token = ''
 
 ipgrab = ["GRABIFYLINK", "LEANCODINGCO", "SIOPIFY", "FREEGIFICARDSCO", "CURIOUSCAICLUB", "CAISNIHINGSFUN", "JOINMYSIIE",
           "CAISNIHINGSCOM", "IPLOGGERORG", "BLASZECOM", "WEBRESOLVERNL", "CURLV", "SHORIESI", "BIIURLIO", "RURLCO",
@@ -64,6 +65,7 @@ async def on_message(message):
         ['p!edit'] : moderation.housekeeping.edit,
         ['p!react'] : moderation.housekeeping.react,
         ['p!report'] : moderation.reportsystem.report,
+        ['p!verify'] : utilities.verify.verify,
         }
     
     if message.content.startswith('p!')==True:
@@ -89,4 +91,4 @@ async def on_ready():
     activity = discord.Activity(name='Paradise Network', type=discord.ActivityType.watching)
     await client.change_presence(status=discord.Status.online, activity=activity)
 
-client.run('NzYxOTcwNDc3NTMwNzQyNzg0.X3iWTg.ot6JKf2tUDKK7nNDHiTfSLoGskE')
+client.run(token)
