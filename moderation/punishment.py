@@ -1,8 +1,10 @@
 async def ban(message):
     if !member.guild_permissions.ban_members:
         await message.channel.send("Not enough perms")
+        
     content_split = await split(content, 2)
     banned_id = await get_digit(content_split[1])
+    
         try:
             banned_id = int(banned_id)
         except:
@@ -10,6 +12,7 @@ async def ban(message):
             embed.set_footer(text="Paradise Bot")
             await message.channel.send(embed=embed)
             return
+        
         try:
             banned = await client.fetch_user(banned_id)
         except discord.errors.NotFound:
@@ -17,6 +20,7 @@ async def ban(message):
             embed.set_footer(text="Paradise Bot")
             await message.channel.send(embed=embed)
             return
+        
         print("this is to be banned: ", banned_id, banned, message.guild)
         if banned == None:
             embed = discord.Embed(title="Member Not Found", description="You need to include the Member after p!ban!\nCorrect syntax - `p!ban <member id or mention> (reason for ban)`", color=65280)
@@ -43,6 +47,7 @@ async def ban(message):
                 except asyncio.TimeoutError:
                     await message.channel.send("Oh Well, I did not get the reason in time, too bad i can't ban without reason :(")
                     return
+                
             prepare = f'''SELECT MAX(`case_id`) FROM PunishmentLogs'''
             Cursor.execute(prepare)
             case_id = Cursor.fetchall()
@@ -54,6 +59,7 @@ async def ban(message):
                 case_id = 0
             else:
                 case_id += 1
+                
             time_now = datetime.datetime.now(datetime.timezone.utc)
             time_now = await unaware_timezone(time_now)
             prepare = f'''INSERT INTO PunishmentLogs (`User_id`,`Duration`,`reason`,`Mod`,`action`,`time`,`case_id`)
@@ -100,6 +106,7 @@ async def unban(message):
             embed.set_footer(text="Paradise Bot")
             await message.channel.send(embed=embed)
             return
+        
         try:
             banned = await client.fetch_user(banned_id)
         except discord.errors.NotFound:
@@ -108,6 +115,7 @@ async def unban(message):
             embed.set_footer(text="Paradise Bot")
             await message.channel.send(embed=embed)
             return
+        
         print("this is to be banned: ", banned_id, banned, message.guild)
         if banned == None:
             embed = discord.Embed(title="Member Not Found", description="You need to include the Member after p!unban!\nCorrect syntax - `p!unban <member id or mention>`",
@@ -134,6 +142,7 @@ async def unmute(message):
     member = message.author
     channel = message.channel
     print(member.id, type(member.id))
+    
     if member.guild_permissions.mute_members:
         print("has perms")
         content_split = await split(content, 2)
@@ -146,6 +155,7 @@ async def unmute(message):
             embed.set_footer(text="Paradise Bot")
             await message.channel.send(embed=embed)
             return
+        
         try:
             banned = await client.fetch_user(banned_id)
         except discord.errors.NotFound:
@@ -154,6 +164,7 @@ async def unmute(message):
             embed.set_footer(text="Paradise Bot")
             await message.channel.send(embed=embed)
             return
+        
         print("this is to be banned: ", banned_id, banned, message.guild)
         if banned == None:
             embed = discord.Embed(title="Member Not Found", description="You need to include the Member after p!unmute!\nCorrect syntax - `p!unmute <member id or mention>`",
@@ -161,7 +172,6 @@ async def unmute(message):
             embed.set_footer(text="Paradise Bot")
             await message.channel.send(embed=embed)
         else:
-
             role_check = discord.utils.get(message.guild.roles, name="Muted")
             mute_role = get(message.guild.roles, name="Muted")
             embed = discord.Embed(title=f"Unmuted {banned}", color=16711680,
@@ -182,6 +192,7 @@ async def unban_service(message):
         await message.delete()
     except discord.NotFound:
         print("message not found D:")
+        
     content = message.content
     member = message.author
     channel = message.channel
@@ -198,6 +209,7 @@ async def unban_service(message):
             embed.set_footer(text="Paradise Bot")
             await message.channel.send(embed=embed)
             return
+        
         try:
             banned = await client.fetch_user(banned_id)
         except discord.errors.NotFound:
@@ -206,6 +218,7 @@ async def unban_service(message):
             embed.set_footer(text="Paradise Bot")
             await message.channel.send(embed=embed)
             return
+        
         print("this is to be banned: ", banned_id, banned, message.guild)
         if banned == None:
             embed = discord.Embed(title="Member Not Found", description="You need to include the Member after p!service-unban!\nCorrect syntax - `p!service-unban <member id or mention>`",
@@ -252,6 +265,7 @@ async def TempBan(message):
             embed.set_footer(text="Paradise Bot")
             await message.channel.send(embed=embed)
             return
+        
         try:
             banned = await client.fetch_user(banned_id)
         except discord.errors.NotFound:
@@ -260,6 +274,7 @@ async def TempBan(message):
             embed.set_footer(text="Paradise Bot")
             await message.channel.send(embed=embed)
             return
+        
         possible_time = await split(content_split[2], 9999)
         print(possible_time)
         # del possible_time(5)
@@ -273,6 +288,7 @@ async def TempBan(message):
             await message.channel.send(embed=await Invalid_Time_send())
             return
         sec_human = ' '.join([str(elem) for elem in sec_human])
+        
         if reason == "":
             def check(message):
                 print("checking for reason")
@@ -289,6 +305,7 @@ async def TempBan(message):
             except asyncio.TimeoutError:
                 await message.channel.send("Oh Well, I did not get the reason in time, too bad i can't ban without reason :(")
                 return
+            
         done: bool = False
         while done == False:
             try:
@@ -421,6 +438,7 @@ async def Tempmute(message):
             except asyncio.TimeoutError:
                 await message.channel.send("Oh Well, I did not get the reason in time, too bad i can't mute without reason :(")
                 return
+            
         await message.channel.send(f"Heres the time in calc in (sec): {sec} \n Reason: {reason}")
         done: bool = False
         while done == False:
@@ -437,11 +455,13 @@ async def Tempmute(message):
         members_on_cooldown = Cursor.fetchall()
         print(members_on_cooldown)
         members_on_cooldown = await read_member_id(members_on_cooldown)
+        
         if str(muted_id) in members_on_cooldown:
             prepare = f"""DELETE FROM Transactions 
             WHERE User_id='{str(muted_id)}'
             AND Transaction= 'unmute'"""
             Cursor.execute(prepare)
+            
         mute_role = get(member.guild.roles, name="Muted")
         await muted.add_roles(mute_role)
         time_in_future = await time_future(sec)
@@ -461,6 +481,7 @@ async def Tempmute(message):
             case_id = 0
         else:
             case_id += 1
+            
         prepare = f'''INSERT INTO PunishmentLogs (`User_id`,`Duration`,`reason`,`Mod`,`action`,`time`,`case_id`)
         VALUES ('{muted_id}','{sec}','{reason}','{str(member.id)}','tempmute','{time_now}','{case_id}')'''
         duration = sec
@@ -503,6 +524,7 @@ async def logs_user(message):
             embed.set_footer(text="Paradise Bot")
             await message.channel.send(embed=embed)
             return
+        
         log_id = await get_digit(log_id)
         try:
             log_id = int(log_id)
@@ -512,6 +534,7 @@ async def logs_user(message):
             embed.set_footer(text="Paradise Bot")
             await message.channel.send(embed=embed)
             return
+        
         print('log-id: ', log_id)
         try:
             page_no = await get_digit(content_split[2])
@@ -537,6 +560,7 @@ async def logs_user(message):
             embed.set_footer(text="Paradise Bot")
             await message.channel.send(embed=embed)
             return
+        
         prepare = f'''SELECT * FROM PunishmentLogs WHERE `User_id`='{log_id}'
         ORDER BY case_id DESC'''
         Cursor.execute(prepare)
@@ -569,7 +593,7 @@ async def logs_user(message):
         embed = discord.Embed(title=f"{log_user} ({int(log_id)})", timestamp=datetime.datetime.now(
             datetime.timezone.utc), color=26861)
         embed.set_footer(
-            text=f"Paradise Bot • Page Number {int(page_no)+1} out of {len(pages)}")
+            text=f"Paradise Bot Â• Page Number {int(page_no)+1} out of {len(pages)}")
         embed.set_thumbnail(url=log_user.avatar_url)
         for page_number in page:
             page_number = int(page_number)
@@ -598,6 +622,7 @@ async def case(message):
             embed.set_footer(text="Paradise Bot")
             await channel.send(embed=embed)
             return
+        
         item_id = await get_digit(item_id)
         try:
             item_id = int(item_id)
@@ -607,6 +632,7 @@ async def case(message):
             embed.set_footer(text="Paradise Bot")
             await channel.send(embed=embed)
             return
+        
         prepare = f'''Select * From PunishmentLogs WHERE `case_id`='{item_id}' '''
         Cursor.execute(prepare)
         Case = Cursor.fetchall()
@@ -618,6 +644,7 @@ async def case(message):
             embed.set_footer(text="Paradise Bot")
             await channel.send(embed=embed)
             return
+        
         log_user = await client.fetch_user(int(Case[3]))
         print("log user-: ", log_user, "\nId: ", int(Case[3]))
         offender = await client.fetch_user(int(Case[0]))
@@ -653,6 +680,7 @@ async def remove_case(message):
             embed.set_footer(text="Paradise Bot")
             await channel.send(embed=embed)
             return
+        
         item_id = await get_digit(item_id)
         try:
             item_id = int(item_id)
@@ -662,6 +690,7 @@ async def remove_case(message):
             embed.set_footer(text="Paradise Bot")
             await channel.send(embed=embed)
             return
+        
         prepare = f'''Select * From PunishmentLogs WHERE `case_id`='{item_id}' '''
         Cursor.execute(prepare)
         Case = Cursor.fetchall()
@@ -673,6 +702,7 @@ async def remove_case(message):
             embed.set_footer(text="Paradise Bot")
             await channel.send(embed=embed)
             return
+        
         prepare = f'''DELETE FROM PunishmentLogs WHERE `case_id`='{item_id}' '''
         Cursor.execute(prepare)
         embed = discord.Embed(title=f"Case - #{int(Case[6])}", description=f"Case#{int(Case[6])} has been sucessfully deleted!\nModerator - <@{member.id}>",
@@ -701,6 +731,7 @@ async def change_reason(message):
             embed.set_footer(text="Paradise Bot")
             await channel.send(embed=embed)
             return
+        
         item_id = await get_digit(item_id)
         try:
             item_id = int(item_id)
@@ -710,6 +741,7 @@ async def change_reason(message):
             embed.set_footer(text="Paradise Bot")
             await channel.send(embed=embed)
             return
+        
         prepare = f'''Select * From PunishmentLogs WHERE `case_id`='{item_id}' '''
         Cursor.execute(prepare)
         Case = Cursor.fetchall()
@@ -725,6 +757,7 @@ async def change_reason(message):
             embed.set_footer(text="Paradise Bot")
             await channel.send(embed=embed)
             return
+        
         try:
             reason = content_split[2]
         except IndexError:
@@ -740,6 +773,7 @@ async def change_reason(message):
             except asyncio.TimeoutError:
                 await message.channel.send("Oh Well, I did not get the reason in time, too bad i can't mute without reason :(")
                 return
+            
         if reason == '':
             try:
                 embed = discord.Embed(
@@ -753,6 +787,7 @@ async def change_reason(message):
             except asyncio.TimeoutError:
                 await message.channel.send("Oh Well, I did not get the reason in time, too bad i can't mute without reason :(")
                 return
+            
         prepare = f'''DELETE FROM PunishmentLogs WHERE `case_id`='{item_id}' '''
         Cursor.execute(prepare)
         prepare = f'''INSERT INTO PunishmentLogs (`User_id`,`Duration`,`reason`,`Mod`,`action`,`time`,`case_id`)
@@ -788,6 +823,7 @@ async def warn(message):
             embed.set_footer(text="Paradise Bot")
             await message.channel.send(embed=embed)
             return
+        
         warned_id = await get_digit(warned_id)
         try:
             warned_id = int(warned_id)
@@ -797,6 +833,7 @@ async def warn(message):
             embed.set_footer(text="Paradise Bot")
             await message.channel.send(embed=embed)
             return
+        
         try:
             warned = await client.fetch_user(warned_id)
         except discord.errors.NotFound:
@@ -805,6 +842,7 @@ async def warn(message):
             embed.set_footer(text="Paradise Bot")
             await message.channel.send(embed=embed)
             return
+        
         print("this is to be banned: ", warned_id, warned, message.guild)
         if warned == None:
             embed = discord.Embed(title="Member Not Found", description="Either the member id is wrong or the member is not in this server\nCorrect syntax - `p!warn <member id or mention> [reason for warn]`",
@@ -831,6 +869,7 @@ async def warn(message):
                 except asyncio.TimeoutError:
                     await message.channel.send("Oh Well, I did not get the reason in time, too bad i can't warn without reason :(", delete_after=5)
                     return
+                
             if reason == '':
                 try:
                     embed = discord.Embed(
@@ -844,6 +883,7 @@ async def warn(message):
                 except asyncio.TimeoutError:
                     await message.channel.send("Oh Well, I did not get the reason in time, too bad i can't warn without reason :(")
                     return
+                
             prepare = f'''SELECT MAX(`case_id`) FROM PunishmentLogs'''
             Cursor.execute(prepare)
             case_id = Cursor.fetchall()
@@ -897,6 +937,7 @@ async def temp_service_ban(message):
             embed.set_footer(text="Paradise Bot")
             await message.channel.send(embed=embed)
             return
+        
         banned_id = await get_digit(banned_id)
         try:
             banned_id = int(banned_id)
@@ -906,6 +947,7 @@ async def temp_service_ban(message):
             embed.set_footer(text="Paradise Bot")
             await message.channel.send(embed=embed)
             return
+        
         print('banned-id: ', banned_id)
         try:
             banned = await message.guild.fetch_member(banned_id)
@@ -916,6 +958,7 @@ async def temp_service_ban(message):
             await message.channel.send(embed=embed)
             print('muted-id: ', banned_id)
             return
+        
         if banned == None:
             print(banned_id, banned)
             embed = discord.Embed(title="Member Not Found", description="Either the member id is wrong or the member is not in this server\nCorrect syntax - `p!serviceban <member id or mention> (time) [reason for warn]`",
@@ -923,11 +966,13 @@ async def temp_service_ban(message):
             embed.set_footer(text="Paradise Bot")
             await message.channel.send(embed=embed)
             return
+        
         try:
             possible_time = await split(content_split[2], 9999)
         except IndexError:
             await message.channel.send(embed=await Invalid_Time_send())
             return
+        
         print(possible_time)
         # del possible_time(5)
         sec = await convert_possible_time_to_sec(possible_time)
@@ -939,6 +984,7 @@ async def temp_service_ban(message):
         if str(sec) == "0":
             await message.channel.send(embed=await Invalid_Time_send())
             return
+        
         sec_human = ' '.join([str(elem) for elem in sec_human])
         if reason == "":
             def check(message):
@@ -956,6 +1002,7 @@ async def temp_service_ban(message):
             except asyncio.TimeoutError:
                 await message.channel.send("Oh Well, I did not get the reason in time, too bad i can't service ban without reason :(")
                 return
+            
         await message.channel.send(f"Heres the time in calc in (sec): {sec} \n Reason: {reason}")
         done: bool = False
         while done == False:
@@ -972,6 +1019,7 @@ async def temp_service_ban(message):
         members_on_cooldown = Cursor.fetchall()
         print(members_on_cooldown)
         members_on_cooldown = await read_member_id(members_on_cooldown)
+        
         if str(banned_id) in members_on_cooldown:
             prepare = f"""DELETE FROM Transactions 
             WHERE User_id='{str(banned_id)}'
@@ -994,6 +1042,7 @@ async def temp_service_ban(message):
         case_id = Cursor.fetchall()
         print("Heres the case_id: ", case_id)
         case_id = (case_id[0][0])
+        
         try:
             case_id = int(case_id)
         except:
@@ -1008,6 +1057,7 @@ async def temp_service_ban(message):
             duration = "Doesn't Apply to bans and warns"
         embed = discord.Embed(title=f"Case #{case_id} has been registered!", color=16711680,
                               description=f"**Offender: **<@{banned_id}>\n**Moderator: **<@{int(member.id)}>\n**Action: **Service Ban\n**Duration: **{duration}\n**Reason: **{reason}", timestamp=datetime.datetime.now(datetime.timezone.utc))
+        
         try:
             dm = await banned.create_dm()
         except:
