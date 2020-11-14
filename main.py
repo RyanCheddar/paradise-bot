@@ -29,6 +29,7 @@ from moderation.time_manager import *
 from moderation.scanning import *
 
 client = discord.Client()
+token = ''
 
 
 #Global variables
@@ -86,6 +87,7 @@ async def on_message(message):
         ['p!edit'] : moderation.housekeeping.edit,
         ['p!react'] : moderation.housekeeping.react,
         ['p!report'] : moderation.reportsystem.report,
+        ['p!verify'] : utilities.verify.verify,
         ["p!ban"]: ban,
         ["p!tempban"]: TempBan,
         ["p!start-transactionmanager","p!start","p!start-transactionsmanager"]: start_transactionmanager,
@@ -126,4 +128,4 @@ async def on_ready():
     await client.change_presence(status=discord.Status.online, activity=activity)
     await transactionmanager()
 
-client.run('NzYxOTcwNDc3NTMwNzQyNzg0.X3iWTg.ot6JKf2tUDKK7nNDHiTfSLoGskE')
+client.run(token)
