@@ -10,6 +10,7 @@ async def unaware_timezone(time_now):
     #print (year,month,day,hour,minute,sec)
     return datetime.datetime(year=year, month=month, day=day, hour=hour, minute=minute, second=sec)
 
+
 async def time_future(duration):
     time_now = datetime.datetime.now(datetime.timezone.utc)
     duration = int(duration)
@@ -27,7 +28,6 @@ async def time_future(duration):
     from datetime import timezone
     timestamp = future_time.replace(tzinfo=timezone.utc)
     return future_time
-
 
 
 async def convert_possible_time_to_sec(possible_time):

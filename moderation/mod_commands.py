@@ -21,7 +21,7 @@ async def ban(ctx):
             await ctx.channel.send(embed=embed)
             return
         try:
-            banned = await bot.fetch_user(banned_id)
+            banned = await client.fetch_user(banned_id)
         except discord.errors.NotFound:
             embed = discord.Embed(title="Member Not Found", description="You need to include the Member after p!ban!\nCorrect syntax - `p!ban <member id or mention> (reason for ban)`",
                                   timestamp=datetime.datetime.now(datetime.timezone.utc), color=65280)
@@ -49,7 +49,7 @@ async def ban(ctx):
                     embed.set_footer(text="Paradise Bot")
                     await ctx.channel.send(embed=embed, delete_after=15)
                     print("checking for reason")
-                    reason = await bot.wait_for('message', timeout=15.0, check=check)
+                    reason = await client.wait_for('message', timeout=15.0, check=check)
                     reason = reason.content
                     print(reason)
                 except asyncio.TimeoutError:
@@ -113,7 +113,7 @@ async def unban(ctx):
             await ctx.channel.send(embed=embed)
             return
         try:
-            banned = await bot.fetch_user(banned_id)
+            banned = await client.fetch_user(banned_id)
         except discord.errors.NotFound:
             embed = discord.Embed(title="Member Not Found", description="You need to include the Member after p!unban!\nCorrect syntax - `p!unban <member id or mention>`",
                                   timestamp=datetime.datetime.now(datetime.timezone.utc), color=65280)
@@ -159,7 +159,7 @@ async def unmute(ctx):
             await ctx.channel.send(embed=embed)
             return
         try:
-            banned = await bot.fetch_user(banned_id)
+            banned = await client.fetch_user(banned_id)
         except discord.errors.NotFound:
             embed = discord.Embed(title="Member Not Found", description="You need to include the Member after p!unmute!\nCorrect syntax - `p!unmute <member id or mention>`",
                                   timestamp=datetime.datetime.now(datetime.timezone.utc), color=65280)
@@ -211,7 +211,7 @@ async def unban_service(ctx):
             await ctx.channel.send(embed=embed)
             return
         try:
-            banned = await bot.fetch_user(banned_id)
+            banned = await client.fetch_user(banned_id)
         except discord.errors.NotFound:
             embed = discord.Embed(title="Member Not Found", description="You need to include the Member after p!service-unban!\nCorrect syntax - `p!service-unban <member id or mention>`",
                                   timestamp=datetime.datetime.now(datetime.timezone.utc), color=65280)
@@ -265,7 +265,7 @@ async def TempBan(ctx):
             await ctx.channel.send(embed=embed)
             return
         try:
-            banned = await bot.fetch_user(banned_id)
+            banned = await client.fetch_user(banned_id)
         except discord.errors.NotFound:
             embed = discord.Embed(title="Member Not Found", description="either the member id is wrong or the member disabled/deleted their account",
                                   timestamp=datetime.datetime.now(datetime.timezone.utc), color=16711680)
@@ -295,7 +295,7 @@ async def TempBan(ctx):
                 embed.set_footer(text="Paradise Bot")
                 await ctx.channel.send(embed=embed, delete_after=15)
                 print("checking for reason")
-                reason = await bot.wait_for('message', timeout=15.0, check=check)
+                reason = await client.wait_for('message', timeout=15.0, check=check)
                 reason = reason.content
                 print(reason)
             except asyncio.TimeoutError:
@@ -427,7 +427,7 @@ async def Tempmute(ctx):
                 embed.set_footer(text="Paradise Bot")
                 await ctx.channel.send(embed=embed, delete_after=15)
                 print("checking for reason")
-                reason = await bot.wait_for('message', timeout=15.0, check=check)
+                reason = await client.wait_for('message', timeout=15.0, check=check)
                 reason = reason.content
                 print(reason)
             except asyncio.TimeoutError:
@@ -535,7 +535,7 @@ async def logs_user(ctx):
         if page_no == '':
             page_no: int = 0
         try:
-            log_user = await bot.fetch_user(log_id)
+            log_user = await client.fetch_user(log_id)
             print("the user i found: ", log_user)
         except discord.errors.NotFound:
             embed = discord.Embed(title="Member Not Found", description="The member id is wrong",
@@ -630,9 +630,9 @@ async def case(ctx):
             embed.set_footer(text="Paradise Bot")
             await channel.send(embed=embed)
             return
-        log_user = await bot.fetch_user(int(Case[3]))
+        log_user = await client.fetch_user(int(Case[3]))
         print("log user-: ", log_user, "\nId: ", int(Case[3]))
-        offender = await bot.fetch_user(int(Case[0]))
+        offender = await client.fetch_user(int(Case[0]))
         print("Offender user-: ", offender, "\nId: ", int(Case[0]))
         duration = Case[1]
         duration = await sec_to_time(int(duration))
@@ -746,7 +746,7 @@ async def change_reason(ctx):
                 embed.set_footer(text="Paradise Bot")
                 await ctx.channel.send(embed=embed, delete_after=15)
                 print("checking for reason")
-                reason = await bot.wait_for('message', timeout=15.0, check=check)
+                reason = await client.wait_for('message', timeout=15.0, check=check)
                 reason = reason.content
                 print(reason)
             except asyncio.TimeoutError:
@@ -759,7 +759,7 @@ async def change_reason(ctx):
                 embed.set_footer(text="Paradise Bot")
                 await ctx.channel.send(embed=embed, delete_after=15)
                 print("checking for reason")
-                reason = await bot.wait_for('message', timeout=15.0, check=check)
+                reason = await client.wait_for('message', timeout=15.0, check=check)
                 reason = reason.content
                 print(reason)
             except asyncio.TimeoutError:
@@ -810,7 +810,7 @@ async def warn(ctx):
             await ctx.channel.send(embed=embed)
             return
         try:
-            warned = await bot.fetch_user(warned_id)
+            warned = await client.fetch_user(warned_id)
         except discord.errors.NotFound:
             embed = discord.Embed(title="Member Not Found", description="Either the member id is wrong or the member is not in this server\nCorrect syntax - `p!warn <member id or mention> [reason for warn]`",
                                   timestamp=datetime.datetime.now(datetime.timezone.utc), color=65280)
@@ -837,7 +837,7 @@ async def warn(ctx):
                     embed.set_footer(text="Paradise Bot")
                     await ctx.channel.send(embed=embed, delete_after=15)
                     print("checking for reason")
-                    reason = await bot.wait_for('message', timeout=15.0, check=check)
+                    reason = await client.wait_for('message', timeout=15.0, check=check)
                     reason = reason.content
                     print(reason)
                 except asyncio.TimeoutError:
@@ -850,7 +850,7 @@ async def warn(ctx):
                     embed.set_footer(text="Paradise Bot")
                     await ctx.channel.send(embed=embed, delete_after=15)
                     print("checking for reason")
-                    reason = await bot.wait_for('message', timeout=15.0, check=check)
+                    reason = await client.wait_for('message', timeout=15.0, check=check)
                     reason = reason.content
                     print(reason)
                 except asyncio.TimeoutError:
@@ -962,7 +962,7 @@ async def temp_service_ban(ctx):
                 embed.set_footer(text="Paradise Bot")
                 await ctx.channel.send(embed=embed, delete_after=15)
                 print("checking for reason")
-                reason = await bot.wait_for('message', timeout=15.0, check=check)
+                reason = await client.wait_for('message', timeout=15.0, check=check)
                 reason = reason.content
                 print(reason)
             except asyncio.TimeoutError:

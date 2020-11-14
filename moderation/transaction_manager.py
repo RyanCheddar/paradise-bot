@@ -25,11 +25,11 @@ async def transactionmanager_core():
             print("checked timer")
             user_id = check[0]
             try:
-                user = await bot.fetch_user(int(user_id))
+                user = await client.fetch_user(int(user_id))
             except discord.errors.NotFound:
                 print("user not found at the time of unban.")
             else:
-                guild = bot.get_guild(int(674474377286516736))
+                guild = client.get_guild(int(674474377286516736))
                 print(guild)
                 await guild.unban(user, reason="Automatic Unban.")
             Cursor.execute(
@@ -46,7 +46,7 @@ async def transactionmanager_core():
         if timer <= time_now:
             print("checked timer")
             user_id = check[0]
-            guild = bot.get_guild(int(674474377286516736))
+            guild = client.get_guild(int(674474377286516736))
             #print (guild,guild.members)
             #print (type(guild),type(guild.members))
             try:
@@ -76,7 +76,7 @@ async def transactionmanager_core():
         if timer <= time_now:
             print("checked timer")
             user_id = check[0]
-            guild = bot.get_guild(int(674474377286516736))
+            guild = client.get_guild(int(674474377286516736))
             #print (guild,guild.members)
             #print (type(guild),type(guild.members))
             try:
@@ -96,6 +96,7 @@ async def transactionmanager_core():
                     print("The person was already unbanned at the time of unmute")
                 Cursor.execute(
                     f"DELETE FROM Transactions WHERE User_id={user_id} AND Transaction='unbanservice'")
+
 
 async def start_transactionmanager(ctx):
     if ctx.author.guild_permissions.ban_members:
@@ -130,4 +131,3 @@ async def transactionmanager_forceupdate(ctx):
         await msg.edit(content="Successfully Updated transactions!")
     else:
         await ctx.channel.send(embed=await Not_enough_perms())
-

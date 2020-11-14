@@ -42,13 +42,13 @@ async def split(content, number):
 
 async def punish_log(embed):
     print("getting log channel")
-    devlog = bot.get_channel(int("683331993634603068"))
+    devlog = client.get_channel(int("683331993634603068"))
     await devlog.send(embed=embed)
 
 
 async def log(text):
     print("getting log channel")
-    devlog = bot.get_channel(int("683331960705515570"))
+    devlog = client.get_channel(int("683331960705515570"))
     print("sending logs")
     await devlog.send(text)
     print("log sent")
