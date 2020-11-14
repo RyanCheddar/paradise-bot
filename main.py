@@ -6,6 +6,14 @@ import re
 from threading import Thread
 import time
 import json
+import os
+import mysql.connector
+from discord.ext import commands
+import time
+from discord.utils import get
+import discord.errors
+
+
 
 #Modules
 import moderation
