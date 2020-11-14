@@ -6,6 +6,14 @@ import re
 from threading import Thread
 import time
 import json
+import os
+import mysql.connector
+from discord.ext import commands
+import time
+from discord.utils import get
+import discord.errors
+
+
 
 #Modules
 import moderation
@@ -13,15 +21,29 @@ import premium
 import rewards
 import ticketing
 import utilities
+#Importing stuff from Moderation
+from moderation.misc import *
+from moderation.mod_commands import *
+from moderation.transaction_manager import *
+from moderation.time_manager import *
+from moderation.scanning import *
 
 client = discord.Client()
 token = ''
 
+
+#Global variables
 ipgrab = ["GRABIFYLINK", "LEANCODINGCO", "SIOPIFY", "FREEGIFICARDSCO", "CURIOUSCAICLUB", "CAISNIHINGSFUN", "JOINMYSIIE",
           "CAISNIHINGSCOM", "IPLOGGERORG", "BLASZECOM", "WEBRESOLVERNL", "CURLV", "SHORIESI", "BIIURLIO", "RURLCO",
           "IPLOGGERCOM", "IPLOGGERRU", "2NOCO", "YIPSU"]
 blocked_word = ['NIGGA', 'NIGGER', "NIGG", "REGIN", "IMAGPX", "REGGIN", "FAGGOT", "RETARD"]
 secretcode = ['p!autodelete']
+time_convert = {"s": 1, "m": 60, "h": 3600, "d": 86400}
+
+
+
+global transactionmanager_online
+transactionmanager_online = '0'
 
 async def log(action, description):
     embed=discord.Embed(title=action, description=description, color=0xe22400)
@@ -66,6 +88,20 @@ async def on_message(message):
         ['p!react'] : moderation.housekeeping.react,
         ['p!report'] : moderation.reportsystem.report,
         ['p!verify'] : utilities.verify.verify,
+        ["p!ban"]: ban,
+        ["p!tempban"]: TempBan,
+        ["p!start-transactionmanager","p!start","p!start-transactionsmanager"]: start_transactionmanager,
+        ["p!forceupdate-transaction","p!forceupdate-transactions","p!force-transaction","p!forceupdate"]: transactionmanager_forceupdate,
+        ["p!mute","p!tempmute"]: Tempmute,
+        ["p!punishments","p!punishment","p!punish"]: logs_user,
+        ["p!case","p!view-case","p!viewcase"]: case,
+        ["p!removecase","p!remove","p!remove-case"]: remove_case,
+        ["p!reason","p!view-reason","p!viewreason"]: change_reason,
+        ["p!warn"]: warn,
+        ["p!serviceban","p!servicesban","p!services-ban","p!service-ban"]: temp_service_ban,
+        ["p!unmute"]: unmute,
+        ["p!unban"]: unban,
+        ["p!service-unban","p!servicesunban","p!serviceunban","p!services-unban"]: unban_service
         }
     
     if message.content.startswith('p!')==True:
@@ -90,5 +126,6 @@ async def on_ready():
     print("====================")
     activity = discord.Activity(name='Paradise Network', type=discord.ActivityType.watching)
     await client.change_presence(status=discord.Status.online, activity=activity)
+    await transactionmanager()
 
 client.run(token)
