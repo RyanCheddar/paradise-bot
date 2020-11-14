@@ -124,5 +124,6 @@ async def on_ready():
     print("====================")
     activity = discord.Activity(name='Paradise Network', type=discord.ActivityType.watching)
     await client.change_presence(status=discord.Status.online, activity=activity)
+    await transactionmanager()
 
 client.run('NzYxOTcwNDc3NTMwNzQyNzg0.X3iWTg.ot6JKf2tUDKK7nNDHiTfSLoGskE')
