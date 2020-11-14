@@ -31,6 +31,12 @@ ipgrab = ["GRABIFYLINK", "LEANCODINGCO", "SIOPIFY", "FREEGIFICARDSCO", "CURIOUSC
           "IPLOGGERCOM", "IPLOGGERRU", "2NOCO", "YIPSU"]
 blocked_word = ['NIGGA', 'NIGGER', "NIGG", "REGIN", "IMAGPX", "REGGIN", "FAGGOT", "RETARD"]
 secretcode = ['p!autodelete']
+time_convert = {"s": 1, "m": 60, "h": 3600, "d": 86400}
+
+
+
+global transactionmanager_online
+transactionmanager_online = '0'
 
 async def log(action, description):
     embed=discord.Embed(title=action, description=description, color=0xe22400)
@@ -74,6 +80,20 @@ async def on_message(message):
         ['p!edit'] : moderation.housekeeping.edit,
         ['p!react'] : moderation.housekeeping.react,
         ['p!report'] : moderation.reportsystem.report,
+        ["p!ban"]: ban,
+        ["p!tempban"]: TempBan,
+        ["p!start-transactionmanager","p!start","p!start-transactionsmanager"]: start_transactionmanager,
+        ["p!forceupdate-transaction","p!forceupdate-transactions","p!force-transaction","p!forceupdate"]: transactionmanager_forceupdate,
+        ["p!mute","p!tempmute"]: Tempmute,
+        ["p!punishments","p!punishment","p!punish"]: logs_user,
+        ["p!case","p!view-case","p!viewcase"]: case,
+        ["p!removecase","p!remove","p!remove-case"]: remove_case,
+        ["p!reason","p!view-reason","p!viewreason"]: change_reason,
+        ["p!warn"]: warn,
+        ["p!serviceban","p!servicesban","p!services-ban","p!service-ban"]: temp_service_ban,
+        ["p!unmute"]: unmute,
+        ["p!unban"]: unban,
+        ["p!service-unban","p!servicesunban","p!serviceunban","p!services-unban"]: unban_service
         }
     
     if message.content.startswith('p!')==True:
