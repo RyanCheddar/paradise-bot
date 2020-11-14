@@ -21,6 +21,12 @@ import premium
 import rewards
 import ticketing
 import utilities
+#Importing stuff from Moderation
+from moderation.misc import *
+from moderation.mod_commands import *
+from moderation.transaction_manager import *
+from moderation.time_manager import *
+from moderation.scanning import *
 
 client = discord.Client()
 
