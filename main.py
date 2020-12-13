@@ -65,6 +65,21 @@ async def on_member_update(before,after):
     await moderation.scanning.nickname(before, after)
 
 @client.event
+async def on_member_join(member):
+    captcha = secrets.token_hex(nbytes=6)
+    await member.send("your captcha is __~~***" + captcha + "***~~__")
+
+    def check(m):
+        return m.content == captcha
+    try:
+    msg = await client.wait_for('message', timeout=60.0, check=check)
+    except asynio.timeout:
+      await.send("sorry but fuck off")
+      return
+    await member.send("gg u passed captcha")
+
+
+@client.event
 async def on_message(message):
     if message.author.bot:
         return
