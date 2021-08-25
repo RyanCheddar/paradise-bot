@@ -17,3 +17,5 @@ async def report(message):
 
 # CHANGED: MORE PRETTIER
 # TODO: EVEN MORE PRETTIER
+
+# hi ryan
